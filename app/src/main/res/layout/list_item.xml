@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	android:id="@+id/container"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:gravity="center_vertical"
+	android:minHeight="?android:attr/listPreferredItemHeight"
+	android:padding="@dimen/view_margin_large">
+
+	<TextView
+		android:id="@+id/title"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		android:layout_toLeftOf="@+id/quantityLayout"
+		android:layout_toStartOf="@+id/quantityLayout"
+		tools:text="Toothpaste"/>
+
+	<include
+		android:id="@+id/quantityLayout"
+		layout="@layout/quantity_layout"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:layout_alignParentTop="true"
+		android:layout_centerHorizontal="true"
+		android:layout_marginLeft="@dimen/view_margin_medium"
+		android:layout_marginRight="@dimen/view_margin_medium"/>
+
+	<CheckBox
+		android:id="@+id/shoppingListAdd"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		tools:visibility="visible"/>
+
+	<TextView
+		android:id="@+id/version"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		android:layout_below="@+id/title"
+		android:layout_toLeftOf="@id/unitPrice"
+		android:layout_toStartOf="@id/unitPrice"
+		tools:text="(Herbal mint fresh)"
+		tools:visibility="visible"/>
+
+	<TextView
+		android:id="@+id/unitPrice"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:layout_below="@+id/quantityLayout"
+		android:layout_centerHorizontal="true"
+		tools:text="/@ 135.00 KES"
+		tools:visibility="visible"/>
+
+	<TextView
+		android:id="@+id/totalPrice"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:layout_below="@+id/shoppingListAdd"
+		android:gravity="end"
+		tools:text="675.00 KES"/>
+
+</RelativeLayout>

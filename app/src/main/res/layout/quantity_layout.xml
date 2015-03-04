@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal">
+
+	<TextView
+		android:id="@+id/quantity"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		android:paddingEnd="@dimen/view_margin_small"
+		android:paddingLeft="0dp"
+		android:paddingRight="@dimen/view_margin_small"
+		tools:text="5"/>
+
+	<TextView
+		android:id="@+id/measUnit"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		android:paddingEnd="@dimen/view_margin_small"
+		android:paddingLeft="0dp"
+		android:paddingRight="@dimen/view_margin_small"
+		tools:text="tubes"/>
+
+	<TextView
+		android:id="@+id/openingParenthesis"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		android:paddingLeft="0dp"
+		android:text="@string/opening_parenthesis"/>
+
+	<TextView
+		android:id="@+id/usefulQtty"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		android:paddingEnd="@dimen/view_margin_small"
+		android:paddingLeft="0dp"
+		android:paddingRight="@dimen/view_margin_small"
+		tools:text="675"/>
+
+	<TextView
+		android:id="@+id/usefulUnit"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		tools:text="ml"/>
+
+	<TextView
+		android:id="@+id/closingParenthesis"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		android:text="@string/closing_parenthesis"/>
+
+</LinearLayout>
