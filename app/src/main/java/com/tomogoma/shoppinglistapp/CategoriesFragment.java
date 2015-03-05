@@ -1,13 +1,12 @@
 package com.tomogoma.shoppinglistapp;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.tomogoma.shoppinglistapp.data.DatabaseContract;
@@ -23,7 +21,7 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract;
 /**
  * Created by ogoma on 01/03/15.
  */
-public class CategoriesFragment extends ListFragment implements LoaderCallbacks<Cursor> {
+public class CategoriesFragment extends ListFragment {
 
 	private static final String[] selectColumns = new String[]{
 			DatabaseContract.CategoryEntry._ID,
@@ -39,6 +37,7 @@ public class CategoriesFragment extends ListFragment implements LoaderCallbacks<
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
+		Log.i(getClass().getSimpleName(), "OnCreate called");
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
 		setHasOptionsMenu(true);
@@ -46,13 +45,20 @@ public class CategoriesFragment extends ListFragment implements LoaderCallbacks<
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		getLoaderManager().initLoader(CATEGORY_LOADER, null, this);
+
+		Log.i(getClass().getSimpleName(), "OnActivityCreated called");
+		String sortOrder = DatabaseContract.CategoryEntry.COLUMN_NAME + " ASC";
+		Uri categoryUri = DatabaseContract.CategoryEntry.CONTENT_URI;
+
+		new ContentLoader(getActivity(), this)
+				.loadContent(categoryUri, categoryAdapter, selectColumns, sortOrder);
+
 		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		//  TODO add option menu for adding a category
+
 		if (menu.findItem(R.id.action_add) == null) {
 			inflater.inflate(R.menu.items_frag, menu);
 		}
@@ -65,7 +71,6 @@ public class CategoriesFragment extends ListFragment implements LoaderCallbacks<
 		switch (item.getItemId()) {
 
 			case R.id.action_add:
-				//  TODO fragment for adding item
 				((CanReplaceFragment) getActivity())
 						.replaceFragment(this, new AddItemFragment());
 				return true;
@@ -75,7 +80,10 @@ public class CategoriesFragment extends ListFragment implements LoaderCallbacks<
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+		Log.i(getClass().getSimpleName(), "OnCreateView called");
 		if (savedInstanceState == null) {
+			Log.i(getClass().getSimpleName(), "Null saved instance state");
 			initializeViews();
 		}
 		return inflater.inflate(R.layout.default_list_layout, container, false);
@@ -89,23 +97,23 @@ public class CategoriesFragment extends ListFragment implements LoaderCallbacks<
 		Cursor cursor = categoryAdapter.getCursor();
 		if (cursor != null && cursor.moveToPosition(position)) {
 			long categoryID = cursor.getLong(_ID_COL_INDEX);
-			openItemsFragment(categoryID);
+			String categoryName = cursor.getString(NAME_COL_INDEX);
+			openItemsFragment(categoryID, categoryName);
 		}
 	}
 
-	private void openItemsFragment(long categoryID) {
+	private void openItemsFragment(long categoryID, String categoryName) {
 
-		Bundle arguments = new Bundle();
-		arguments.putLong(ItemsFragment.EXTRA_HIERARCHICAL_PARENT_ID, categoryID);
+		Intent activityIntent = getActivity().getIntent();
+		activityIntent.putExtra(ShoppingCartActivity.EXTRA_String_CATEGORY_NAME, categoryName);
+		activityIntent.putExtra(ShoppingCartActivity.EXTRA_long_CATEGORY_ID, categoryID);
 
-		Fragment itemsFrag = new ItemsFragment();
-		itemsFrag.setArguments(arguments);
-
-		((CanReplaceFragment) getActivity()).replaceFragment(this, itemsFrag);
+		((CanReplaceFragment) getActivity()).replaceFragment(this, new ItemsFragment());
 	}
 
 	private void initializeViews() {
 
+		Log.i(getClass().getSimpleName(), "Initializing views called");
 		categoryAdapter = new SimpleCursorAdapter(
 				getActivity(),
 				R.layout.list_category,
@@ -136,29 +144,4 @@ public class CategoriesFragment extends ListFragment implements LoaderCallbacks<
 		setListAdapter(categoryAdapter);
 	}
 
-	@Override
-	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-		String sortOrder = DatabaseContract.CategoryEntry.COLUMN_NAME + " ASC";
-		Uri categoryUri = DatabaseContract.CategoryEntry.CONTENT_URI;
-
-		return new CursorLoader(
-				getActivity(),
-				categoryUri,
-				selectColumns,
-				null,
-				null,
-				sortOrder
-		);
-	}
-
-	@Override
-	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		categoryAdapter.swapCursor(data);
-	}
-
-	@Override
-	public void onLoaderReset(Loader<Cursor> loader) {
-		categoryAdapter.swapCursor(null);
-	}
 }

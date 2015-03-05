@@ -1,30 +1,71 @@
 package com.tomogoma.shoppinglistapp;
 
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+
+import com.tomogoma.shoppinglistapp.EditTextWithKeyBoardBackEvent.OnImeBackListener;
+import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
+import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class AddItemFragment extends Fragment
-		implements View.OnFocusChangeListener, TextView.OnEditorActionListener, EditTextWithKeyBoardBackEvent.OnImeBackListener {
+		implements OnFocusChangeListener, OnEditorActionListener,
+		           OnImeBackListener, OnCheckedChangeListener {
 
-	private EditText etItemName, etVersion, etUnitPrice, etUsefulUnitsPerActual, etQtty, etCat, etDesc;
-	private EditTextWithKeyBoardBackEvent etBrand, etActualMeasUnit, etUsefulMeasUnit;
-	private TextView tvItemName, tvBrand, tvVersion, tvUnitPrice, tvActualMeasUnit, tvUsefulMeasUnit,
-			tvUsefulUnitsPerActual, tvQtty, tvCat, tvDesc;
+	private static final int ITEM_LOADER_ID = 1;
+	private static final int CATEGORY_LOADER_ID = 0;
+
+	private EditText etVersion;
+	private EditText etUnitPrice;
+	private EditText etLastsFor;
+	private EditText etQuantity;
+	private EditText etDesc;
+
+	private AutoCompleteTextView autoTvCategoryName;
+	private AutoCompleteTextView autoTvItemName;
+
+	private EditTextWithKeyBoardBackEvent etBrand;
+	private EditTextWithKeyBoardBackEvent etActualMeasUnit;
+
+	private TextView tvItemName;
+	private TextView tvBrand;
+	private TextView tvVersion;
+	private TextView tvUnitPrice;
+	private TextView tvActualMeasUnit;
+	private TextView tvLastsFor;
+	private TextView tvQuantity;
+	private TextView tvCat;
+	private TextView tvDesc;
+
+	private RadioGroup rgLastsForUnit;
+
+	private String lastsForUnit;
+
+	private SimpleCursorAdapter itemsAdapter;
+	private SimpleCursorAdapter categoriesAdapter;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -54,75 +95,116 @@ public class AddItemFragment extends Fragment
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+
+		String itemSortOrder = ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_NAME + " ASC";
+		Uri itemUri = ItemEntry.CONTENT_URI;
+		String[] itemProjection = new String[]{
+				ItemEntry.TABLE_NAME + "." + ItemEntry._ID,
+				ItemEntry.COLUMN_NAME
+		};
+
+		String categorySortOrder = CategoryEntry.COLUMN_NAME + " ASC";
+		Uri categoryUri = CategoryEntry.CONTENT_URI;
+		String[] categoryProjection = new String[]{
+				CategoryEntry._ID,
+				CategoryEntry.COLUMN_NAME
+		};
+
+		ContentLoader loader = new ContentLoader(getActivity(), this);
+		loader.loadContent(itemUri, itemsAdapter, itemProjection, itemSortOrder);
+		loader.loadContent(categoryUri, categoriesAdapter, categoryProjection, categorySortOrder);
+
+		super.onActivityCreated(savedInstanceState);
+	}
+
 	private void processInput() {
 
-//	    Item item = new Item(etCat, etItemName, etBrand, etVersion, etUnitPrice, etQtty,
-//	            etActualMeasUnit, etUsefulMeasUnit, etUsefulUnitsPerActual, etDesc);
-//	    new DBAccess(getActivity()).insertItem(item);
+		long categoryID = AddItem.addCategory(getActivity(), autoTvCategoryName);
+		long itemID = AddItem.addItem(getActivity(), categoryID, autoTvItemName,
+		                              etUnitPrice, etQuantity, etLastsFor,
+		                              etActualMeasUnit, lastsForUnit, etDesc);
 
-		long categoryID = AddItem.addCategory(getActivity(), etCat);
-		long itemID = AddItem.addItem(getActivity(), categoryID, etItemName, etUnitPrice, etQtty, etActualMeasUnit, etUsefulMeasUnit,
-		                              etUsefulUnitsPerActual, etDesc);
-
-		if (etBrand.getText().toString().isEmpty()) {
+		if (itemID == -1) {
+			Toast.makeText(getActivity(), "Failed to insert details fully", Toast.LENGTH_LONG)
+			     .show();
 			return;
 		}
 
-		long brandID = AddItem.addBrand(getActivity(), itemID, etBrand, etUnitPrice, etQtty, etDesc);
-
-		if (!etVersion.getText().toString().isEmpty()) {
-			AddItem.addVersion(getActivity(), brandID, etVersion, etUnitPrice, etQtty, etDesc);
-		}
-		Fragment itemsFrag = new ItemsFragment();
-		Bundle args = new Bundle();
-		args.putLong(ItemsFragment.EXTRA_HIERARCHICAL_PARENT_ID, categoryID);
-		itemsFrag.setArguments(args);
-		((CanReplaceFragment) getActivity()).replaceFragment(this, itemsFrag);
+		Intent activityIntent = getActivity().getIntent();
+		activityIntent.putExtra(ShoppingCartActivity.EXTRA_long_CATEGORY_ID, categoryID);
+		activityIntent.putExtra(ShoppingCartActivity.EXTRA_String_CATEGORY_NAME,
+		                        autoTvCategoryName.getText().toString());
+		((CanReplaceFragment) getActivity()).replaceFragment(this, new ItemsFragment());
 	}
 
 	private void initViews(View rootView) {
 
-		etItemName = (EditText) rootView.findViewById(R.id.itemName);
+		itemsAdapter = new TextFiltersAdapter(
+				getActivity(),
+				ItemEntry.CONTENT_URI,
+				ItemEntry.TABLE_NAME + "." + ItemEntry._ID,
+				ItemEntry.COLUMN_NAME
+		);
+
+		categoriesAdapter = new TextFiltersAdapter(
+				getActivity(),
+				CategoryEntry.CONTENT_URI,
+				CategoryEntry._ID,
+				CategoryEntry.COLUMN_NAME
+		);
+
+		autoTvCategoryName = (AutoCompleteTextView) rootView.findViewById(R.id.categoryName);
+		autoTvItemName = (AutoCompleteTextView) rootView.findViewById(R.id.itemName);
+
+		autoTvCategoryName.setAdapter(categoriesAdapter);
+		autoTvItemName.setAdapter(itemsAdapter);
+
 		etUnitPrice = (EditText) rootView.findViewById(R.id.unitPrice);
-		etQtty = (EditText) rootView.findViewById(R.id.quantityLayout);
-		etCat = (EditText) rootView.findViewById(R.id.itemCategory);
-		etVersion = (EditText) rootView.findViewById(R.id.version);
-		etUsefulUnitsPerActual = (EditText) rootView.findViewById(R.id.usefulPerActual);
+		etQuantity = (EditText) rootView.findViewById(R.id.quantity);
+		etVersion = (EditText) rootView.findViewById(R.id.versionName);
+		etLastsFor = (EditText) rootView.findViewById(R.id.lastsFor);
 		etDesc = (EditText) rootView.findViewById(R.id.description);
 
-		etBrand = (EditTextWithKeyBoardBackEvent) rootView.findViewById(R.id.brand);
+		etBrand = (EditTextWithKeyBoardBackEvent) rootView.findViewById(R.id.brandName);
 		etActualMeasUnit = (EditTextWithKeyBoardBackEvent) rootView.findViewById(R.id.measUnit);
-		etUsefulMeasUnit = (EditTextWithKeyBoardBackEvent) rootView.findViewById(R.id.usefulUnit);
 
-		tvCat = (TextView) rootView.findViewById(R.id.itemCategoryHint);
+		rgLastsForUnit = (RadioGroup) rootView.findViewById(R.id.lastsForUnit);
+
+		tvCat = (TextView) rootView.findViewById(R.id.categoryNameHint);
 		tvItemName = (TextView) rootView.findViewById(R.id.itemNameHint);
 		tvUnitPrice = (TextView) rootView.findViewById(R.id.unitPriceHint);
-		tvBrand = (TextView) rootView.findViewById(R.id.brandHint);
+		tvBrand = (TextView) rootView.findViewById(R.id.brandNameHint);
 		tvActualMeasUnit = (TextView) rootView.findViewById(R.id.measUnitHint);
-		tvQtty = (TextView) rootView.findViewById(R.id.quantityHint);
-		tvVersion = (TextView) rootView.findViewById(R.id.versionHint);
-		tvUsefulMeasUnit = (TextView) rootView.findViewById(R.id.usefulUnitHint);
-		tvUsefulUnitsPerActual = (TextView) rootView.findViewById(R.id.usefulPerActualHint);
+		tvQuantity = (TextView) rootView.findViewById(R.id.quantityHint);
+		tvVersion = (TextView) rootView.findViewById(R.id.versionNameHint);
+		tvLastsFor = (TextView) rootView.findViewById(R.id.lastsForHint);
 		tvDesc = (TextView) rootView.findViewById(R.id.descriptionHint);
 
-		etItemName.setOnFocusChangeListener(this);
+		autoTvItemName.setOnFocusChangeListener(this);
 		etUnitPrice.setOnFocusChangeListener(this);
 		etBrand.setOnFocusChangeListener(this);
 		etActualMeasUnit.setOnFocusChangeListener(this);
-		etQtty.setOnFocusChangeListener(this);
-		etCat.setOnFocusChangeListener(this);
+		etQuantity.setOnFocusChangeListener(this);
+		autoTvCategoryName.setOnFocusChangeListener(this);
 		etVersion.setOnFocusChangeListener(this);
-		etUsefulMeasUnit.setOnFocusChangeListener(this);
-		etUsefulUnitsPerActual.setOnFocusChangeListener(this);
+		rgLastsForUnit.setOnFocusChangeListener(this);
+		etLastsFor.setOnFocusChangeListener(this);
 		etDesc.setOnFocusChangeListener(this);
 
 		etBrand.setOnEditorActionListener(this);
 		etActualMeasUnit.setOnEditorActionListener(this);
-		etUsefulMeasUnit.setOnEditorActionListener(this);
+
+		rgLastsForUnit.setOnCheckedChangeListener(this);
+		onCheckedChanged(rgLastsForUnit, rgLastsForUnit.getCheckedRadioButtonId());
 
 		etBrand.setOnEditTextImeBackListener(this);
 		etActualMeasUnit.setOnEditTextImeBackListener(this);
-		etUsefulMeasUnit.setOnEditTextImeBackListener(this);
+
+		String categoryName = getActivity().getIntent()
+		                                   .getStringExtra(ShoppingCartActivity.EXTRA_String_CATEGORY_NAME);
+		autoTvCategoryName.setText(categoryName);
 	}
 
 	@Override
@@ -130,7 +212,7 @@ public class AddItemFragment extends Fragment
 
 		if (hasFocus) {
 			switch (v.getId()) {
-				case R.id.itemCategory:
+				case R.id.categoryName:
 					tvCat.setVisibility(View.VISIBLE);
 					break;
 				case R.id.itemName:
@@ -141,23 +223,20 @@ public class AddItemFragment extends Fragment
 					tvUnitPrice.setVisibility(View.VISIBLE);
 					break;
 				case R.id.quantityLayout:
-					setUnit(tvQtty, R.string.quantity_hint_detail);
-					tvQtty.setVisibility(View.VISIBLE);
+					setUnit(tvQuantity, R.string.quantity_hint_detail);
+					tvQuantity.setVisibility(View.VISIBLE);
 					break;
-				case R.id.brand:
+				case R.id.brandName:
 					tvBrand.setVisibility(View.VISIBLE);
 					break;
-				case R.id.version:
+				case R.id.versionName:
 					tvVersion.setVisibility(View.VISIBLE);
 					break;
 				case R.id.measUnit:
 					tvActualMeasUnit.setVisibility(View.VISIBLE);
 					break;
-				case R.id.usefulUnit:
-					tvUsefulMeasUnit.setVisibility(View.VISIBLE);
-					break;
-				case R.id.usefulPerActual:
-					tvUsefulUnitsPerActual.setVisibility(View.VISIBLE);
+				case R.id.lastsFor:
+					tvLastsFor.setVisibility(View.VISIBLE);
 					break;
 				case R.id.description:
 					tvDesc.setVisibility(View.VISIBLE);
@@ -165,7 +244,7 @@ public class AddItemFragment extends Fragment
 			}//switch
 		} else {
 			switch (v.getId()) {
-				case R.id.itemCategory:
+				case R.id.categoryName:
 					tvCat.setVisibility(View.GONE);
 					break;
 				case R.id.itemName:
@@ -175,23 +254,20 @@ public class AddItemFragment extends Fragment
 					tvUnitPrice.setVisibility(View.GONE);
 					break;
 				case R.id.quantityLayout:
-					tvQtty.setVisibility(View.GONE);
+					tvQuantity.setVisibility(View.GONE);
 					break;
-				case R.id.brand:
+				case R.id.brandName:
 					tvBrand.setVisibility(View.GONE);
-					setVersionEditability();
 					break;
-				case R.id.version:
+				case R.id.versionName:
 					tvVersion.setVisibility(View.GONE);
 					break;
 				case R.id.measUnit:
+					setLastsForEditability();
 					tvActualMeasUnit.setVisibility(View.GONE);
 					break;
-				case R.id.usefulUnit:
-					tvUsefulMeasUnit.setVisibility(View.GONE);
-					break;
-				case R.id.usefulPerActual:
-					tvUsefulUnitsPerActual.setVisibility(View.GONE);
+				case R.id.lastsFor:
+					tvLastsFor.setVisibility(View.GONE);
 					break;
 				case R.id.description:
 					tvDesc.setVisibility(View.GONE);
@@ -244,14 +320,11 @@ public class AddItemFragment extends Fragment
 	private void processDependentViewVisibility(View v) {
 
 		switch (v.getId()) {
-			case R.id.brand:
+			case R.id.brandName:
 				setVersionEditability();
 				break;
 			case R.id.measUnit:
-				setUsefulMeasUnitEditability();
-				break;
-			case R.id.usefulUnit:
-				setUsefulPerActualEditability();
+				setLastsForEditability();
 				break;
 		}
 	}
@@ -261,33 +334,38 @@ public class AddItemFragment extends Fragment
 		processDependentViewVisibility(v);
 	}
 
-	private void setUsefulMeasUnitEditability() {
+	private void setLastsForEditability() {
 
 		if (etActualMeasUnit.getText().toString().isEmpty()) {
-			setUnEditable(etUsefulMeasUnit);
-			setUsefulPerActualEditability();
+			rgLastsForUnit.setVisibility(View.GONE);
+			etLastsFor.setVisibility(View.GONE);
 			return;
 		}
 
 		String measUnit = etActualMeasUnit.getText().toString();
-		String hintDetStr = getResources().getString(R.string.useful_unit_hint_detail);
-		hintDetStr = String.format(hintDetStr, measUnit);
-		tvUsefulMeasUnit.setText(hintDetStr);
-		setEditable(etUsefulMeasUnit);
-	}
-
-	private void setUsefulPerActualEditability() {
-
-		if (etUsefulMeasUnit.getText().toString().isEmpty()) {
-			setUnEditable(etUsefulUnitsPerActual);
-			return;
-		}
-
-		String measUnit = etActualMeasUnit.getText().toString();
-		String usefulUnit = etUsefulMeasUnit.getText().toString();
 		String hintDetStr = getResources().getString(R.string.useful_per_actual_hint_detail);
-		hintDetStr = String.format(hintDetStr, measUnit, usefulUnit);
-		tvUsefulUnitsPerActual.setText(hintDetStr);
-		setEditable(etUsefulUnitsPerActual);
+		hintDetStr = String.format(hintDetStr, measUnit, lastsForUnit);
+		tvLastsFor.setText(hintDetStr);
+		etLastsFor.setVisibility(View.VISIBLE);
+		rgLastsForUnit.setVisibility(View.VISIBLE);
 	}
+
+	@Override
+	public void onCheckedChanged(RadioGroup group, int checkedId) {
+		switch (checkedId) {
+			case R.id.lastsDays:
+				lastsForUnit = "Days";
+				break;
+			case R.id.lastsWeeks:
+				lastsForUnit = "Weeks";
+				break;
+			case R.id.lastsMonths:
+				lastsForUnit = "Months";
+				break;
+			case R.id.lastsYears:
+				lastsForUnit = "Years";
+				break;
+		}
+	}
+
 }

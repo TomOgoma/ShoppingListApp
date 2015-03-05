@@ -1,35 +1,27 @@
 <ScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content">
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
 
-	<RelativeLayout
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content">
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical">
 
 		<TextView
-			android:id="@+id/itemCategoryHint"
+			android:id="@+id/categoryNameHint"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_alignParentTop="true"
-			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
 			android:hint="@string/item_category_hint_detail"
 			android:singleLine="true"
 			android:visibility="gone"/>
 
 		<AutoCompleteTextView
-			android:id="@+id/itemCategory"
+			android:id="@+id/categoryName"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/itemCategoryHint"
-			android:layout_margin="@dimen/view_margin_small"
+			android:layout_marginTop="0dp"
+			android:layout_marginBottom="@dimen/view_margin_medium"
 			android:hint="@string/item_category_hint"
 			android:inputType="text|textCapWords"
 			android:singleLine="true"/>
@@ -38,25 +30,18 @@
 			android:id="@+id/itemNameHint"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/itemCategory"
+			android:layout_marginTop="@dimen/view_margin_medium"
 			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
 			android:labelFor="@+id/itemName"
 			android:text="@string/item_name_hint_detail"
 			android:visibility="gone"/>
 
-		<EditText
+		<AutoCompleteTextView
 			android:id="@+id/itemName"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/itemNameHint"
-			android:layout_margin="@dimen/view_margin_small"
+			android:layout_marginTop="0dp"
+			android:layout_marginBottom="@dimen/view_margin_medium"
 			android:hint="@string/item_name_hint"
 			android:inputType="text|textCapWords"
 			android:singleLine="true"/>
@@ -65,13 +50,8 @@
 			android:id="@+id/unitPriceHint"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/itemName"
+			android:layout_marginTop="@dimen/view_margin_medium"
 			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
 			android:labelFor="@+id/unitPrice"
 			android:text="@string/price_hint_detail"
 			android:visibility="gone"/>
@@ -80,10 +60,8 @@
 			android:id="@+id/unitPrice"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/unitPriceHint"
-			android:layout_margin="@dimen/view_margin_small"
+			android:layout_marginTop="0dp"
+			android:layout_marginBottom="@dimen/view_margin_medium"
 			android:hint="@string/price_hint"
 			android:inputType="numberDecimal"
 			android:singleLine="true"/>
@@ -92,106 +70,78 @@
 			android:id="@+id/quantityHint"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/unitPrice"
+			android:layout_marginTop="@dimen/view_margin_medium"
 			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
 			android:labelFor="@+id/quantityLayout"
 			android:text="@string/quantity_hint_detail"
 			android:visibility="gone"/>
 
 		<EditText
-			android:id="@+id/quantityLayout"
+			android:id="@+id/quantity"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/quantityHint"
-			android:layout_margin="@dimen/view_margin_small"
+			android:layout_marginTop="0dp"
+			android:layout_marginBottom="@dimen/view_margin_medium"
 			android:hint="@string/quantity_hint"
 			android:inputType="number|numberDecimal"
 			android:singleLine="true"/>
 
 		<TextView
-			android:id="@+id/separater"
+			android:id="@+id/separator"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_below="@+id/quantityLayout"
-			android:width="0dp"
-			android:padding="@dimen/view_margin_small"
+			android:layout_marginTop="@dimen/view_margin_medium"
+			android:layout_marginBottom="@dimen/view_margin_medium"
 			android:text="@string/more_text"/>
 
 		<TextView
-			android:id="@+id/brandHint"
+			android:id="@+id/brandNameHint"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/separater"
+			android:layout_marginTop="@dimen/view_margin_medium"
 			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
-			android:labelFor="@+id/brand"
+			android:labelFor="@+id/brandName"
 			android:text="@string/brand_hint_detail"
 			android:visibility="gone"/>
 
 		<com.tomogoma.shoppinglistapp.EditTextWithKeyBoardBackEvent
-			android:id="@+id/brand"
+			android:id="@+id/brandName"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/brandHint"
-			android:layout_margin="@dimen/view_margin_small"
+			android:layout_marginTop="0dp"
+			android:layout_marginBottom="@dimen/view_margin_medium"
 			android:hint="@string/brand_hint"
 			android:inputType="text|textCapWords"
-			android:singleLine="true"/>
+			android:singleLine="true"
+			android:visibility="gone"/>
 
 		<TextView
-			android:id="@+id/versionHint"
+			android:id="@+id/versionNameHint"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/brand"
+			android:layout_marginTop="@dimen/view_margin_medium"
 			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
-			android:labelFor="@+id/version"
+			android:labelFor="@+id/versionName"
 			android:text="@string/brand_version_hint_detail"
 			android:visibility="gone"/>
 
 		<EditText
-			android:id="@+id/version"
+			android:id="@+id/versionName"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/versionHint"
-			android:layout_margin="@dimen/view_margin_small"
-			android:enabled="false"
-			android:focusable="false"
+			android:layout_marginTop="0dp"
+			android:layout_marginBottom="@dimen/view_margin_medium"
 			android:hint="@string/brand_version_hint"
 			android:inputType="text|textCapWords"
 			android:singleLine="true"
-			android:visibility="visible"/>
+			android:visibility="gone"/>
 
 		<TextView
 			android:id="@+id/measUnitHint"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/version"
+			android:layout_marginTop="@dimen/view_margin_medium"
 			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
 			android:labelFor="@+id/measUnit"
 			android:text="@string/meas_unit_hint_detail"
 			android:visibility="gone"/>
@@ -200,85 +150,80 @@
 			android:id="@+id/measUnit"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/measUnitHint"
-			android:layout_margin="@dimen/view_margin_small"
+			android:layout_marginTop="0dp"
+			android:layout_marginBottom="@dimen/view_margin_medium"
 			android:hint="@string/meas_unit_hint"
 			android:inputType="text|textCapWords"
 			android:singleLine="true"/>
 
 		<TextView
-			android:id="@+id/usefulUnitHint"
+			android:id="@+id/lastsForHint"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/measUnit"
+			android:layout_marginTop="@dimen/view_margin_medium"
 			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
-			android:labelFor="@+id/usefulUnit"
-			android:text="@string/useful_unit_hint_detail"
-			android:visibility="gone"/>
-
-		<com.tomogoma.shoppinglistapp.EditTextWithKeyBoardBackEvent
-			android:id="@+id/usefulUnit"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/usefulUnitHint"
-			android:layout_margin="@dimen/view_margin_small"
-			android:enabled="false"
-			android:focusable="false"
-			android:hint="@string/useful_unit_hint"
-			android:inputType="text|textCapWords"
-			android:singleLine="true"
-			android:visibility="visible"/>
-
-		<TextView
-			android:id="@+id/usefulPerActualHint"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/usefulUnit"
-			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
-			android:labelFor="@+id/usefulPerActual"
+			android:labelFor="@+id/lastsFor"
 			android:text="@string/useful_per_actual_hint_detail"
 			android:visibility="gone"/>
 
-		<EditText
-			android:id="@+id/usefulPerActual"
+		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/usefulPerActualHint"
-			android:layout_margin="@dimen/view_margin_small"
-			android:enabled="false"
-			android:focusable="false"
-			android:hint="@string/useful_per_actual_hint"
-			android:inputType="number|numberDecimal"
-			android:singleLine="true"
-			android:visibility="visible"/>
+			android:orientation="horizontal"
+			android:layout_marginTop="0dp"
+			android:layout_marginBottom="@dimen/view_margin_medium">
+
+			<EditText
+				android:id="@+id/lastsFor"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:hint="@string/useful_per_actual_hint"
+				android:inputType="number|numberDecimal"
+				android:singleLine="true"
+				android:visibility="gone"
+				android:gravity="center"/>
+
+			<RadioGroup
+				android:id="@+id/lastsForUnit"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:orientation="horizontal"
+				android:visibility="gone">
+
+				<RadioButton
+					android:id="@+id/lastsDays"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/lasts_day_text"/>
+
+				<RadioButton
+					android:id="@+id/lastsWeeks"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/lasts_week_text"/>
+
+				<RadioButton
+					android:id="@+id/lastsMonths"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/lasts_month_text"
+					android:checked="true"/>
+
+				<RadioButton
+					android:id="@+id/lastsYears"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/lasts_year_text"/>
+
+			</RadioGroup>
+		</LinearLayout>
 
 		<TextView
 			android:id="@+id/descriptionHint"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/usefulPerActual"
+			android:layout_marginTop="@dimen/view_margin_medium"
 			android:layout_marginBottom="0dp"
-			android:layout_marginLeft="@dimen/view_margin_small"
-			android:layout_marginRight="@dimen/view_margin_small"
-			android:layout_marginTop="@dimen/view_margin_small"
 			android:labelFor="@+id/description"
 			android:text="@string/description_hint_detail"
 			android:visibility="gone"/>
@@ -287,11 +232,7 @@
 			android:id="@+id/description"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_alignParentStart="true"
-			android:layout_below="@+id/descriptionHint"
-			android:layout_margin="@dimen/view_margin_small"
 			android:hint="@string/description_hint"
 			android:inputType="text|textMultiLine|textCapSentences"/>
-	</RelativeLayout>
+	</LinearLayout>
 </ScrollView>

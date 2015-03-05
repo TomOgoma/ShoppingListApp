@@ -1,15 +1,18 @@
 package com.tomogoma.shoppinglistapp.data;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.util.Log;
 
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.BrandEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
+import com.tomogoma.shoppinglistapp.data.DatabaseContract.CommonAttributesEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.VersionEntry;
 
@@ -26,7 +29,15 @@ public class ShoppingListProvider extends ContentProvider {
 	private static final int BRAND_IN_ITEM = 302;
 	private static final int VERSION = 400;
 	private static final int VERSION_IN_BRAND = 403;
+	private static final int COMMON_ATTRIBUTES = 5432;
 	private DBHelper dbHelper;
+
+	private static final String ITEM_SELECTION_TABLE =
+			ItemEntry.TABLE_NAME + " LEFT JOIN " + CommonAttributesEntry.TABLE_NAME +
+					" ON " +
+					ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_COMMON_ATTRIBUTES_KEY +
+					" = " +
+					CommonAttributesEntry.TABLE_NAME + "." + CommonAttributesEntry._ID;
 
 	private static UriMatcher buildUriMatcher() {
 
@@ -44,7 +55,103 @@ public class ShoppingListProvider extends ContentProvider {
 
 		matcher.addURI(authority, DatabaseContract.PATH_CATEGORY, CATEGORY);
 
+		matcher.addURI(authority, DatabaseContract.PATH_COMMON_ATTRIBUTES, COMMON_ATTRIBUTES);
+
 		return matcher;
+	}
+
+	private Uri insertItem(SQLiteDatabase db, Uri uri, ContentValues values) {
+
+		ContentValues commonValues = extractCommonAttributes(values);
+		ContentValues itemValues = extractItemValues(values);
+
+		db.beginTransaction();
+		try {
+
+			long commonID = db.insert(CommonAttributesEntry.TABLE_NAME, null, commonValues);
+			if (commonID <= 0)
+				throw new android.database.SQLException("Failed to insert row into " + uri);
+
+			itemValues.put(ItemEntry.COLUMN_COMMON_ATTRIBUTES_KEY, commonID);
+			long _id = db.insert(ItemEntry.TABLE_NAME, null, itemValues);
+			if (_id <= 0) {
+				throw new android.database.SQLException("Failed to insert row into " + uri);
+			}
+
+			db.setTransactionSuccessful();
+			return ItemEntry.buildItemUri(_id);
+		} finally {
+			db.endTransaction();
+		}
+	}
+
+	private int updateItem(SQLiteDatabase db, ContentValues values, String selection, String[] selectionArgs) {
+
+		ContentValues commonValues = extractCommonAttributes(values);
+		ContentValues itemValues = extractItemValues(values);
+		String commonAttrSelection = CommonAttributesEntry._ID + " = ?";
+		String itemHaving = ItemEntry.COLUMN_COMMON_ATTRIBUTES_KEY + " != \"\"";
+
+		int rowsAffected;
+		db.beginTransaction();
+		try {
+			//  get common attribute IDs from affected Items (where common attribute IDs exist)
+			Cursor cursor = db.query(ItemEntry.TABLE_NAME,
+			                         new String[]{ItemEntry.COLUMN_COMMON_ATTRIBUTES_KEY},
+			                         selection, selectionArgs, null, itemHaving, null);
+			//  for all items, update corresponding attributes
+			if (cursor.moveToFirst()) {
+				do {
+					String commonAttrID = cursor.getString(cursor.getColumnIndex(ItemEntry.COLUMN_COMMON_ATTRIBUTES_KEY));
+					db.update(CommonAttributesEntry.TABLE_NAME, commonValues, commonAttrSelection, new String[]{commonAttrID});
+				} while (cursor.moveToNext());
+			}
+			cursor.close();
+			rowsAffected = db.update(ItemEntry.TABLE_NAME, itemValues, selection, selectionArgs);
+			db.setTransactionSuccessful();
+		} finally {
+			db.endTransaction();
+		}
+		return rowsAffected;
+	}
+
+	private ContentValues extractCommonAttributes(ContentValues values) {
+
+		ContentValues commonValues = new ContentValues();
+
+		commonValues.put(CommonAttributesEntry._ID,
+		                 values.getAsLong(CommonAttributesEntry._ID));
+		commonValues.put(CommonAttributesEntry.COLUMN_PRICE,
+		                 values.getAsDouble(CommonAttributesEntry.COLUMN_PRICE));
+		commonValues.put(CommonAttributesEntry.COLUMN_QTTY,
+		                 values.getAsFloat(CommonAttributesEntry.COLUMN_QTTY));
+		commonValues.put(CommonAttributesEntry.COLUMN_DESC,
+		                 values.getAsString(CommonAttributesEntry.COLUMN_DESC));
+		commonValues.put(CommonAttributesEntry.COLUMN_MEAS_UNIT,
+		                 values.getAsString(CommonAttributesEntry.COLUMN_MEAS_UNIT));
+		commonValues.put(CommonAttributesEntry.COLUMN_USEFUL_UNIT,
+		                 values.getAsString(CommonAttributesEntry.COLUMN_USEFUL_UNIT));
+		commonValues.put(CommonAttributesEntry.COLUMN_USEFUL_PER_MEAS,
+		                 values.getAsFloat(CommonAttributesEntry.COLUMN_USEFUL_PER_MEAS));
+		Log.d(getClass().getSimpleName(), "UsefulPerMeas: " + values.getAsFloat(CommonAttributesEntry.COLUMN_USEFUL_PER_MEAS));
+		commonValues.put(CommonAttributesEntry.COLUMN_IN_LIST,
+		                 values.getAsInteger(CommonAttributesEntry.COLUMN_IN_LIST));
+		commonValues.put(CommonAttributesEntry.COLUMN_IN_CART,
+		                 values.getAsInteger(CommonAttributesEntry.COLUMN_IN_CART));
+
+		return commonValues;
+	}
+
+	private ContentValues extractItemValues(ContentValues values) {
+
+		ContentValues itemValues = new ContentValues();
+
+		itemValues.put(ItemEntry._ID, values.getAsLong(ItemEntry._ID));
+		itemValues.put(ItemEntry.COLUMN_COMMON_ATTRIBUTES_KEY, values.getAsLong(ItemEntry.COLUMN_COMMON_ATTRIBUTES_KEY));
+		itemValues.put(ItemEntry.COLUMN_CAT_KEY, values.getAsLong(ItemEntry.COLUMN_CAT_KEY));
+		itemValues.put(ItemEntry.COLUMN_NAME, values.getAsString(ItemEntry.COLUMN_NAME));
+
+		return itemValues;
 	}
 
 	@Override
@@ -73,7 +180,7 @@ public class ShoppingListProvider extends ContentProvider {
 
 			case ITEM:
 				retCursor = dbHelper.getReadableDatabase().query(
-						ItemEntry.TABLE_NAME,
+						ITEM_SELECTION_TABLE,
 						projection,
 						selection,
 						selectionArgs,
@@ -119,6 +226,18 @@ public class ShoppingListProvider extends ContentProvider {
 				retCursor = getVersionsInBrand(uri, projection, sortOrder);
 				break;
 
+			case COMMON_ATTRIBUTES:
+				retCursor = dbHelper.getReadableDatabase().query(
+						CommonAttributesEntry.TABLE_NAME,
+						projection,
+						selection,
+						selectionArgs,
+						null,
+						null,
+						sortOrder
+				);
+				break;
+
 			default:
 				throw new UnsupportedOperationException("Unknown uri: " + uri);
 		}
@@ -142,6 +261,8 @@ public class ShoppingListProvider extends ContentProvider {
 			case VERSION:
 			case VERSION_IN_BRAND:
 				return DatabaseContract.VersionEntry.CONTENT_TYPE;
+			case COMMON_ATTRIBUTES:
+				return CommonAttributesEntry.CONTENT_ITEM_TYPE;
 			default:
 				throw new UnsupportedOperationException("Unknown uri: " + uri);
 		}
@@ -172,15 +293,19 @@ public class ShoppingListProvider extends ContentProvider {
 				break;
 			}
 			case ITEM: {
-				long _id = db.insert(ItemEntry.TABLE_NAME, null, values);
-				if (_id > 0)
-					returnUri = ItemEntry.buildItemUri(_id);
-				else
-					throw new android.database.SQLException("Failed to insert row into " + uri);
+				returnUri = insertItem(db, uri, values);
 				break;
 			}
 			case CATEGORY: {
 				long _id = db.insert(CategoryEntry.TABLE_NAME, null, values);
+				if (_id > 0)
+					returnUri = CategoryEntry.buildCategoryUri(_id);
+				else
+					throw new android.database.SQLException("Failed to insert row into " + uri);
+				break;
+			}
+			case COMMON_ATTRIBUTES: {
+				long _id = db.insert(CommonAttributesEntry.TABLE_NAME, null, values);
 				if (_id > 0)
 					returnUri = CategoryEntry.buildCategoryUri(_id);
 				else
@@ -249,7 +374,8 @@ public class ShoppingListProvider extends ContentProvider {
 
 				try {
 					for (ContentValues value : values) {
-						long _id = db.insert(ItemEntry.TABLE_NAME, null, value);
+						long _id = ContentUris.parseId(insertItem(db, uri, value));
+//						long _id = db.insert(ItemEntry.TABLE_NAME, null, value);
 						if (_id != -1) {
 							returnCount++;
 						}
@@ -333,7 +459,7 @@ public class ShoppingListProvider extends ContentProvider {
 				rowsUpdated = db.update(BrandEntry.TABLE_NAME, values, selection, selectionArgs);
 				break;
 			case ITEM:
-				rowsUpdated = db.update(ItemEntry.TABLE_NAME, values, selection, selectionArgs);
+				rowsUpdated = updateItem(db, values, selection, selectionArgs);
 				break;
 			case CATEGORY:
 				rowsUpdated = db.update(CategoryEntry.TABLE_NAME, values, selection, selectionArgs);
@@ -355,7 +481,7 @@ public class ShoppingListProvider extends ContentProvider {
 		String categorySelection = ItemEntry.COLUMN_CAT_KEY + "=?";
 
 		return dbHelper.getReadableDatabase().query(
-				ItemEntry.TABLE_NAME,
+				ITEM_SELECTION_TABLE,
 				projection,
 				categorySelection,
 				new String[]{categoryID},
