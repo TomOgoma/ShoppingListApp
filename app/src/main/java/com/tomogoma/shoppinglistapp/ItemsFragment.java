@@ -3,7 +3,7 @@ package com.tomogoma.shoppinglistapp;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,12 +19,11 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
  */
 public class ItemsFragment extends Fragment {
 
-	private ItemListAdapter itemsAdapter;
+	private SimpleCursorAdapter itemsAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
-		Log.i(getClass().getSimpleName(), "OnCreate called");
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
 		setHasOptionsMenu(true);
@@ -33,10 +32,8 @@ public class ItemsFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		Log.i(getClass().getSimpleName(), "OnCreateView called");
 		View rootView = inflater.inflate(R.layout.default_list_layout, container, false);
 		if (savedInstanceState == null) {
-			Log.i(getClass().getSimpleName(), "Null saved instance state");
 			initializeViews(rootView);
 		}
 		return rootView;
@@ -62,7 +59,6 @@ public class ItemsFragment extends Fragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 
-		Log.i(getClass().getSimpleName(), "OnActivityCreated called");
 		long parentID = getActivity().getIntent()
 		                             .getLongExtra(ShoppingCartActivity.EXTRA_long_CATEGORY_ID, 1);
 
@@ -78,7 +74,6 @@ public class ItemsFragment extends Fragment {
 
 	private void initializeViews(View rootView) {
 
-		Log.i(getClass().getSimpleName(), "initializeViews called");
 		itemsAdapter = new ItemListAdapter(getActivity());
 		ListView listView = (ListView) rootView.findViewById(android.R.id.list);
 		listView.setAdapter(itemsAdapter);

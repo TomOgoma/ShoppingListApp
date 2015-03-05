@@ -35,9 +35,6 @@ public class AddItemFragment extends Fragment
 		implements OnFocusChangeListener, OnEditorActionListener,
 		           OnImeBackListener, OnCheckedChangeListener {
 
-	private static final int ITEM_LOADER_ID = 1;
-	private static final int CATEGORY_LOADER_ID = 0;
-
 	private EditText etVersion;
 	private EditText etUnitPrice;
 	private EditText etLastsFor;
@@ -132,10 +129,21 @@ public class AddItemFragment extends Fragment
 			return;
 		}
 
+		String itemName = autoTvItemName.getText().toString();
+		String toastMessage =  itemName + " successfully created";
+
+		String categoryName = autoTvCategoryName.getText().toString();
+		if (categoryName.isEmpty()) {
+			categoryName = CategoryEntry.DEFAULT_CATEGORY_NAME;
+			toastMessage += " but placed";
+		}
+
+		toastMessage += " in the " + categoryName + " category";
+		Toast.makeText(getActivity(), toastMessage, Toast.LENGTH_LONG).show();
+
 		Intent activityIntent = getActivity().getIntent();
 		activityIntent.putExtra(ShoppingCartActivity.EXTRA_long_CATEGORY_ID, categoryID);
-		activityIntent.putExtra(ShoppingCartActivity.EXTRA_String_CATEGORY_NAME,
-		                        autoTvCategoryName.getText().toString());
+		activityIntent.putExtra(ShoppingCartActivity.EXTRA_String_CATEGORY_NAME, categoryName);
 		((CanReplaceFragment) getActivity()).replaceFragment(this, new ItemsFragment());
 	}
 

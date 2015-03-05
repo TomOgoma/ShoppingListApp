@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,7 +18,7 @@ import android.widget.TextView;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract;
 
 /**
- * Created by ogoma on 01/03/15.
+ * Created by Tom Ogoma on 01/03/15.
  */
 public class CategoriesFragment extends ListFragment {
 
@@ -30,14 +29,11 @@ public class CategoriesFragment extends ListFragment {
 	private static final int _ID_COL_INDEX = 0;
 	private static final int NAME_COL_INDEX = 1;
 
-	private static final int CATEGORY_LOADER = 1234;
-
 	private SimpleCursorAdapter categoryAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
-		Log.i(getClass().getSimpleName(), "OnCreate called");
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
 		setHasOptionsMenu(true);
@@ -46,7 +42,6 @@ public class CategoriesFragment extends ListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 
-		Log.i(getClass().getSimpleName(), "OnActivityCreated called");
 		String sortOrder = DatabaseContract.CategoryEntry.COLUMN_NAME + " ASC";
 		Uri categoryUri = DatabaseContract.CategoryEntry.CONTENT_URI;
 
@@ -67,7 +62,6 @@ public class CategoriesFragment extends ListFragment {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-
 		switch (item.getItemId()) {
 
 			case R.id.action_add:
@@ -81,9 +75,7 @@ public class CategoriesFragment extends ListFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		Log.i(getClass().getSimpleName(), "OnCreateView called");
 		if (savedInstanceState == null) {
-			Log.i(getClass().getSimpleName(), "Null saved instance state");
 			initializeViews();
 		}
 		return inflater.inflate(R.layout.default_list_layout, container, false);
@@ -113,7 +105,6 @@ public class CategoriesFragment extends ListFragment {
 
 	private void initializeViews() {
 
-		Log.i(getClass().getSimpleName(), "Initializing views called");
 		categoryAdapter = new SimpleCursorAdapter(
 				getActivity(),
 				R.layout.list_category,
