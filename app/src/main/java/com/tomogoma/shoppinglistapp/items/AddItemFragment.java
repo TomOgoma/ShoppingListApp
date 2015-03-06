@@ -1,4 +1,4 @@
-package com.tomogoma.shoppinglistapp;
+package com.tomogoma.shoppinglistapp.items;
 
 
 import android.content.Intent;
@@ -21,11 +21,17 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
-import com.tomogoma.shoppinglistapp.EditTextWithKeyBoardBackEvent.OnImeBackListener;
+import com.tomogoma.shoppinglistapp.R;
+import com.tomogoma.shoppinglistapp.data.AddItem;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
+import com.tomogoma.util.ui.CanReplaceFragment;
+import com.tomogoma.util.ui.ContentLoader;
+import com.tomogoma.util.ui.EditTextWithKeyBoardBackEvent;
+import com.tomogoma.util.ui.EditTextWithKeyBoardBackEvent.OnImeBackListener;
+import com.tomogoma.util.ui.TextFiltersAdapter;
+import com.tomogoma.util.ui.UIUtils;
 
 
 /**
@@ -118,32 +124,55 @@ public class AddItemFragment extends Fragment
 
 	private void processInput() {
 
+		String itemName = autoTvItemName.getText().toString();
+		String categoryName = autoTvCategoryName.getText().toString();
+
+		if (categoryName.isEmpty() && itemName.isEmpty()) {
+
+			autoTvItemName.setError("Probably forgot the item's name?");
+			autoTvCategoryName.setError("Nice to have categories, isn't it?");
+
+			String errorMessage = "Missing the item name or category name; must enter at least one";
+			UIUtils.showToast(getActivity(), errorMessage);
+
+			return;
+		}
+
 		long categoryID = AddItem.addCategory(getActivity(), autoTvCategoryName);
+
+		if (itemName.isEmpty()) {
+			UIUtils.showToast(getActivity(), "Category: " + categoryName + " is now in place");
+			openItemFragment(categoryID, categoryName);
+			return;
+		}
+
 		long itemID = AddItem.addItem(getActivity(), categoryID, autoTvItemName,
 		                              etUnitPrice, etQuantity, etLastsFor,
 		                              etActualMeasUnit, lastsForUnit, etDesc);
 
 		if (itemID == -1) {
-			Toast.makeText(getActivity(), "Failed to insert details fully", Toast.LENGTH_LONG)
-			     .show();
+			//  TODO edit the item?
+			UIUtils.showToast(getActivity(), itemName + " already exists");
 			return;
 		}
 
-		String itemName = autoTvItemName.getText().toString();
 		String toastMessage =  itemName + " successfully created";
 
-		String categoryName = autoTvCategoryName.getText().toString();
 		if (categoryName.isEmpty()) {
 			categoryName = CategoryEntry.DEFAULT_CATEGORY_NAME;
 			toastMessage += " but placed";
 		}
 
 		toastMessage += " in the " + categoryName + " category";
-		Toast.makeText(getActivity(), toastMessage, Toast.LENGTH_LONG).show();
+		UIUtils.showToast(getActivity(), toastMessage);
+		openItemFragment(categoryID, categoryName);
+	}
+
+	private void openItemFragment(long categoryID, String categoryName) {
 
 		Intent activityIntent = getActivity().getIntent();
-		activityIntent.putExtra(ShoppingCartActivity.EXTRA_long_CATEGORY_ID, categoryID);
-		activityIntent.putExtra(ShoppingCartActivity.EXTRA_String_CATEGORY_NAME, categoryName);
+		activityIntent.putExtra(AllItemsActivity.EXTRA_long_CATEGORY_ID, categoryID);
+		activityIntent.putExtra(AllItemsActivity.EXTRA_String_CATEGORY_NAME, categoryName);
 		((CanReplaceFragment) getActivity()).replaceFragment(this, new ItemsFragment());
 	}
 
@@ -211,7 +240,7 @@ public class AddItemFragment extends Fragment
 		etActualMeasUnit.setOnEditTextImeBackListener(this);
 
 		String categoryName = getActivity().getIntent()
-		                                   .getStringExtra(ShoppingCartActivity.EXTRA_String_CATEGORY_NAME);
+		                                   .getStringExtra(AllItemsActivity.EXTRA_String_CATEGORY_NAME);
 		autoTvCategoryName.setText(categoryName);
 	}
 

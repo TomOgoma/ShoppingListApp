@@ -1,4 +1,4 @@
-package com.tomogoma.shoppinglistapp;
+package com.tomogoma.shoppinglistapp.items;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -15,7 +15,10 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract;
+import com.tomogoma.util.ui.CanReplaceFragment;
+import com.tomogoma.util.ui.ContentLoader;
 
 /**
  * Created by Tom Ogoma on 01/03/15.
@@ -97,8 +100,8 @@ public class CategoriesFragment extends ListFragment {
 	private void openItemsFragment(long categoryID, String categoryName) {
 
 		Intent activityIntent = getActivity().getIntent();
-		activityIntent.putExtra(ShoppingCartActivity.EXTRA_String_CATEGORY_NAME, categoryName);
-		activityIntent.putExtra(ShoppingCartActivity.EXTRA_long_CATEGORY_ID, categoryID);
+		activityIntent.putExtra(AllItemsActivity.EXTRA_String_CATEGORY_NAME, categoryName);
+		activityIntent.putExtra(AllItemsActivity.EXTRA_long_CATEGORY_ID, categoryID);
 
 		((CanReplaceFragment) getActivity()).replaceFragment(this, new ItemsFragment());
 	}

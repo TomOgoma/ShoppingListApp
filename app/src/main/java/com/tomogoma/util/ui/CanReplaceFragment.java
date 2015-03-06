@@ -1,4 +1,4 @@
-package com.tomogoma.shoppinglistapp;
+package com.tomogoma.util.ui;
 
 import android.support.v4.app.Fragment;
 

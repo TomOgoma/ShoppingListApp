@@ -1,4 +1,4 @@
-package com.tomogoma.shoppinglistapp;
+package com.tomogoma.shoppinglistapp.items;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -6,8 +6,12 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.tomogoma.shoppinglistapp.R;
+import com.tomogoma.util.ui.CanReplaceFragment;
+import com.tomogoma.util.ui.UIUtils;
 
-public class ShoppingCartActivity extends ActionBarActivity
+
+public class AllItemsActivity extends ActionBarActivity
 		implements CanReplaceFragment {
 
 	protected static final String EXTRA_long_CATEGORY_ID = ItemsFragment.class.getName() + "_extra.category.id";
@@ -51,6 +55,8 @@ public class ShoppingCartActivity extends ActionBarActivity
 
 	@Override
 	public void replaceFragment(Fragment currFrag, Fragment withFragment) {
+
+		UIUtils.hideKeyboard(this, getCurrentFocus());
 
 		if (withFragment instanceof ItemsFragment) {
 			setTitle(getIntent().getStringExtra(EXTRA_String_CATEGORY_NAME));
