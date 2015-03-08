@@ -1,10 +1,17 @@
 <resources>
+	<!--Application Strings-->
 	<string name="app_name">Shopping List App</string>
-	<string name="hello_world">Hello world!</string>
+
+	<!--Titles-->
+	<string name="title_activity_add_item">Add Item</string>
+	<string name ="title_activity_item_listing">Items</string>
+
+	<!--AcionBar actions-->
 	<string name="action_settings">Settings</string>
 	<string name="action_add">Add</string>
 	<string name="action_done">Done</string>
 
+	<!--Strings for views-->
 	<string name="item_name_hint">item name</string>
 	<string name="item_name_hint_detail">item name e.g. Toothpaste, Barsoap...</string>
 	<string name="item_category_hint">item category</string>
@@ -33,5 +40,4 @@
 	<string name="lasts_week_text">Weeks</string>
 	<string name="lasts_month_text">Months</string>
 	<string name="lasts_year_text">Years</string>
-	<string name="title_activity_add_item">Add Item</string>
 </resources>

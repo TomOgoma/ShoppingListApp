@@ -2,21 +2,26 @@ package com.tomogoma.shoppinglistapp.items.add;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.tomogoma.shoppinglistapp.R;
+import com.tomogoma.shoppinglistapp.items.list.CategoryListingActivity;
+import com.tomogoma.util.ui.ShoppingListAppActivity;
 
-public class AddItemActivity extends ActionBarActivity {
+public class AddItemActivity extends ShoppingListAppActivity {
 
 	public static final String EXTRA_long_CATEGORY_ID = AddItemActivity.class.getName() + "_extra.category.id";
 	public static final String EXTRA_String_CATEGORY_NAME = AddItemActivity.class.getName() + "_extra.category.name";
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected Class<?> getParentActivity() {
+		return CategoryListingActivity.class;
+	}
 
-		super.onCreate(savedInstanceState);
+	@Override
+	protected void onSuperCreate(Bundle savedInstanceState) {
+
 		setContentView(R.layout.activity_add_item);
 
 		if (savedInstanceState == null) {
@@ -39,8 +44,7 @@ public class AddItemActivity extends ActionBarActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		getMenuInflater().inflate(R.menu.add_item, menu);
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -49,6 +53,7 @@ public class AddItemActivity extends ActionBarActivity {
 		switch (item.getItemId()) {
 
 			case R.id.action_done: {
+
 				//  TODO result not okay for back press, cancel etc
 				AddItemFragment addItemFragment = (AddItemFragment)
 						getSupportFragmentManager().findFragmentByTag(AddItemFragment.class.getName());
@@ -57,10 +62,7 @@ public class AddItemActivity extends ActionBarActivity {
 				finish();
 				return true;
 			}
-			case R.id.action_settings:
-				return true;
 		}
-
 		return super.onOptionsItemSelected(item);
 	}
 
