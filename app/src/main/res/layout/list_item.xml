@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-	android:id="@+id/container"
+	android:id="@+id/selectionContainer"
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:gravity="center_vertical"
 	android:minHeight="?android:attr/listPreferredItemHeight"
+	android:background="@drawable/touch_selector"
 	android:padding="@dimen/view_margin_large">
 
 	<TextView
@@ -15,47 +16,53 @@
 		android:layout_height="@dimen/text_view_height"
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
-		android:layout_toLeftOf="@+id/quantityLayout"
-		android:layout_toStartOf="@+id/quantityLayout"
 		tools:text="Toothpaste"/>
-
-	<include
-		android:id="@+id/quantityLayout"
-		layout="@layout/quantity_layout"
-		android:layout_width="wrap_content"
-		android:layout_height="@dimen/text_view_height"
-		android:layout_alignParentTop="true"
-		android:layout_centerHorizontal="true"
-		android:layout_marginLeft="@dimen/view_margin_medium"
-		android:layout_marginRight="@dimen/view_margin_medium"/>
-
-	<CheckBox
-		android:id="@+id/shoppingListAdd"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentEnd="true"
-		android:layout_alignParentRight="true"
-		android:layout_alignParentTop="true"
-		tools:visibility="visible"/>
 
 	<TextView
 		android:id="@+id/versionName"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:layout_toRightOf="@id/title"
+		android:layout_toEndOf="@id/title"
+		android:layout_toLeftOf="@+id/shoppingListAdd"
+		android:layout_toStartOf="@+id/shoppingListAdd"
+		android:paddingLeft="@dimen/view_margin_small"
+		android:paddingRight="@dimen/view_margin_small"
+		tools:text="(Colgate Herbal mint fresh)"
+		tools:visibility="visible"/>
+
+	<CheckBox
+		android:id="@+id/shoppingListAdd"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignBaseline="@+id/title"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		tools:visibility="visible"/>
+
+	<include
+		android:id="@+id/quantityLayout"
+		layout="@layout/quantity_layout"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:minHeight="@dimen/text_view_height"
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
-		android:layout_below="@+id/title"
-		android:layout_toLeftOf="@id/unitPrice"
-		android:layout_toStartOf="@id/unitPrice"
-		tools:text="(Herbal mint fresh)"
-		tools:visibility="visible"/>
+		android:layout_below="@+id/title"/>
 
 	<TextView
 		android:id="@+id/unitPrice"
 		android:layout_width="wrap_content"
 		android:layout_height="@dimen/text_view_height"
-		android:layout_below="@+id/quantityLayout"
+		android:layout_below="@+id/title"
+		android:layout_toRightOf="@id/quantityLayout"
+		android:layout_toEndOf="@id/quantityLayout"
+		android:layout_toLeftOf="@+id/totalPrice"
+		android:layout_toStartOf="@+id/totalPrice"
 		android:layout_centerHorizontal="true"
+		android:gravity="center_horizontal"
 		tools:text="/@ 135.00 KES"
 		tools:visibility="visible"/>
 

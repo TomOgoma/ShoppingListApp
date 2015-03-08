@@ -22,6 +22,7 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 
 	private Context context;
 	private Fragment fragment;
+	private OnLoadFinishedListener mLoadFinishedCallBack;
 
 	private class LoaderData {
 
@@ -44,6 +45,10 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 			this.selectionArgs = selectionArgs;
 			this.cursorAdapter = cursorAdapter;
 		}
+	}
+
+	public interface OnLoadFinishedListener{
+		public void onLoadFinished(int id);
 	}
 
 	public ContentLoader(Context context, Fragment fragment) {
@@ -74,6 +79,10 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 		return loaderData.id;
 	}
 
+	public void setOnLoadFinishedListener(OnLoadFinishedListener listener) {
+		mLoadFinishedCallBack = listener;
+	}
+
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
@@ -102,6 +111,10 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 		}
 
 		loaderData.cursorAdapter.swapCursor(data);
+
+		if (mLoadFinishedCallBack != null) {
+			mLoadFinishedCallBack.onLoadFinished(loaderID);
+		}
 	}
 
 	@Override

@@ -42,4 +42,13 @@ public class Formatter {
 		return String.valueOf(quantity);
 	}
 
+	public static String formatMeasUnit(String measUnit) {
+
+		if (measUnit == null || measUnit.isEmpty()) {
+			return "[Item]";
+		}
+
+		return measUnit;
+	}
+
 }

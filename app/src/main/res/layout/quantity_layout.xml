@@ -24,7 +24,7 @@
 		android:paddingEnd="@dimen/view_margin_small"
 		android:paddingLeft="0dp"
 		android:paddingRight="@dimen/view_margin_small"
-		tools:text="tubes"/>
+		tools:text="Tubes"/>
 
 	<TextView
 		android:id="@+id/openingParenthesis"
@@ -32,30 +32,34 @@
 		android:layout_height="@dimen/text_view_height"
 		android:gravity="end"
 		android:paddingLeft="0dp"
-		android:text="@string/opening_parenthesis"/>
+		android:text="@string/opening_parenthesis"
+		android:visibility="gone"/>
 
 	<TextView
-		android:id="@+id/usefulQtty"
+		android:id="@+id/lastsFor"
 		android:layout_width="wrap_content"
 		android:layout_height="@dimen/text_view_height"
 		android:gravity="end"
 		android:paddingEnd="@dimen/view_margin_small"
 		android:paddingLeft="0dp"
 		android:paddingRight="@dimen/view_margin_small"
-		tools:text="675"/>
+		tools:text="6"
+		android:visibility="gone"/>
 
 	<TextView
 		android:id="@+id/lastsForUnit"
 		android:layout_width="wrap_content"
 		android:layout_height="@dimen/text_view_height"
 		android:gravity="end"
-		tools:text="ml"/>
+		tools:text="Months"
+		android:visibility="gone"/>
 
 	<TextView
 		android:id="@+id/closingParenthesis"
 		android:layout_width="wrap_content"
 		android:layout_height="@dimen/text_view_height"
 		android:gravity="end"
-		android:text="@string/closing_parenthesis"/>
+		android:text="@string/closing_parenthesis"
+		android:visibility="gone"/>
 
 </LinearLayout>

@@ -26,6 +26,7 @@ public class DatabaseContract {
 				"vnd.android.cursor.item/" + CONTENT_AUTHORITY + "/" + PATH_CATEGORY;
 
 		public static final String DEFAULT_CATEGORY_NAME = "General";
+		public static final Long DEFAULT_CATEGORY_ID = 1L;
 
 		public static final String TABLE_NAME = "categories";
 		public static final String COLUMN_NAME = "name";
