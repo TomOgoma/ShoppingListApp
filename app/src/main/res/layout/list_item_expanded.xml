@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	android:id="@+id/selectionContainer"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:gravity="center_vertical"
+	android:minHeight="?android:attr/listPreferredItemHeight"
+	android:background="@drawable/touch_selector"
+	android:padding="@dimen/view_margin_large">
+
+	<TextView
+		android:id="@+id/title"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		android:layout_alignParentTop="true"
+		android:layout_toStartOf="@+id/deleteItem"
+		android:layout_toLeftOf="@+id/deleteItem"
+		tools:text="Toothpaste"/>
+
+	<ImageView
+		android:id="@+id/deleteItem"
+		android:layout_width="42dp"
+		android:layout_height="@dimen/text_view_height"
+		android:paddingTop="0dp"
+		android:paddingBottom="12dp"
+		android:paddingLeft="12dp"
+		android:paddingStart="12dp"
+		android:paddingRight="12dp"
+		android:paddingEnd="12dp"
+		android:layout_alignParentTop="true"
+		android:layout_toLeftOf="@+id/editItem"
+		android:layout_toStartOf="@+id/editItem"
+		android:layout_alignTop="@+id/title"
+		android:src="@drawable/ic_delete"/>
+
+	<ImageView
+		android:id="@+id/editItem"
+		android:layout_width="42dp"
+		android:layout_height="@dimen/text_view_height"
+		android:paddingTop="0dp"
+		android:paddingBottom="12dp"
+		android:paddingLeft="12dp"
+		android:paddingStart="12dp"
+		android:paddingRight="12dp"
+		android:paddingEnd="12dp"
+		android:layout_alignParentTop="true"
+		android:layout_toLeftOf="@+id/shoppingListAdd"
+		android:layout_toStartOf="@+id/shoppingListAdd"
+		android:layout_alignTop="@+id/title"
+		android:src="@drawable/ic_edit"/>
+
+	<CheckBox
+		android:id="@+id/shoppingListAdd"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignBaseline="@+id/title"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		tools:visibility="visible"
+		android:focusable="false"/>
+
+	<TextView
+		android:id="@+id/versionName"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:layout_below="@+id/title"
+		android:visibility="gone"
+		tools:text="(Colgate Herbal mint fresh)"
+		tools:visibility="visible"/>
+
+	<TextView
+		android:id="@+id/unitPrice"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:layout_below="@+id/shoppingListAdd"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentEnd="true"
+		android:gravity="right"
+		tools:text="/@ 135.00 KES"
+		tools:visibility="visible"/>
+
+	<include
+		android:id="@+id/quantityLayout"
+		layout="@layout/expanded_quantity_layout"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:minHeight="@dimen/text_view_height"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentStart="true"
+		android:layout_below="@+id/versionName"/>
+
+	<TextView
+		android:id="@+id/totalPrice"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:layout_below="@+id/unitPrice"
+		android:gravity="end"
+		tools:text="675.00 KES"/>
+
+	<TextView
+		android:id="@+id/description"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:minHeight="@dimen/text_view_height"
+		android:paddingBottom="5dp"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentRight="true"
+		android:layout_below="@+id/totalPrice"
+		tools:text="This is the description of Toothpaste, Colgate Herbal Mint fresh"/>
+
+</RelativeLayout>

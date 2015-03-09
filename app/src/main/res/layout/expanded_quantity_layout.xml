@@ -6,24 +6,41 @@
 	android:layout_height="wrap_content"
 	android:orientation="horizontal">
 
-	<TextView
-		android:id="@+id/quantity"
+	<include
 		android:layout_width="wrap_content"
-		android:layout_height="@dimen/text_view_height"
-		android:gravity="end"
-		android:paddingEnd="@dimen/view_margin_small"
-		android:paddingLeft="0dp"
-		android:paddingRight="@dimen/view_margin_small"
-		tools:text="5"/>
+		android:layout_height="wrap_content"
+		layout="@layout/quantity_layout"/>
 
 	<TextView
-		android:id="@+id/measUnit"
+		android:id="@+id/openingParenthesis"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		android:paddingLeft="0dp"
+		android:text="@string/opening_parenthesis"/>
+
+	<TextView
+		android:id="@+id/lastsFor"
 		android:layout_width="wrap_content"
 		android:layout_height="@dimen/text_view_height"
 		android:gravity="end"
 		android:paddingEnd="@dimen/view_margin_small"
 		android:paddingLeft="0dp"
 		android:paddingRight="@dimen/view_margin_small"
-		tools:text="Tubes"/>
+		tools:text="6"/>
+
+	<TextView
+		android:id="@+id/lastsForUnit"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		tools:text="Months"/>
+
+	<TextView
+		android:id="@+id/closingParenthesis"
+		android:layout_width="wrap_content"
+		android:layout_height="@dimen/text_view_height"
+		android:gravity="end"
+		android:text="@string/closing_parenthesis"/>
 
 </LinearLayout>

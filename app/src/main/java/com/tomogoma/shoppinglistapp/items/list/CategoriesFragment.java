@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract;
@@ -129,25 +128,6 @@ public class CategoriesFragment extends ListFragment {
 				new int[]{R.id.categoryName},
 				0
 		);
-
-		mCategoryAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-			@Override
-			public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-
-				switch (columnIndex) {
-
-					case NAME_COL_INDEX: {
-						long categoryID = cursor.getLong(_ID_COL_INDEX);
-						mIDPositionMappings.put(categoryID, cursor.getPosition());
-						String categoryName = cursor.getString(columnIndex);
-						TextView categoryNameView = (TextView) view;
-						categoryNameView.setText(categoryName);
-						return true;
-					}
-				}
-				return false;
-			}
-		});
 
 		setListAdapter(mCategoryAdapter);
 	}

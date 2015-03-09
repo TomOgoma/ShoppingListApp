@@ -6,9 +6,12 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
+
+import java.util.Arrays;
 
 /**
  * Created by ogoma on 28/02/15.
@@ -19,7 +22,7 @@ public class ShoppingListProvider extends ContentProvider {
 
 	private static final int CATEGORY = 100;
 	private static final int ITEM = 200;
-	private static final int ITEM_IN_CATEGORY = 201;
+	private static final int ITEM_ID = 201;
 
 	private DBHelper dbHelper;
 
@@ -29,11 +32,26 @@ public class ShoppingListProvider extends ContentProvider {
 		final String authority = DatabaseContract.CONTENT_AUTHORITY;
 
 		matcher.addURI(authority, DatabaseContract.PATH_ITEM, ITEM);
-		matcher.addURI(authority, DatabaseContract.PATH_ITEM + "/#", ITEM_IN_CATEGORY);
+		matcher.addURI(authority, DatabaseContract.PATH_ITEM + "/#", ITEM_ID);
 
 		matcher.addURI(authority, DatabaseContract.PATH_CATEGORY, CATEGORY);
 
 		return matcher;
+	}
+
+	@Override
+	public String getType(Uri uri) {
+
+		switch (sUriMatcher.match(uri)) {
+			case CATEGORY:
+				return CategoryEntry.CONTENT_TYPE;
+			case ITEM:
+				return ItemEntry.CONTENT_TYPE;
+			case ITEM_ID:
+				return ItemEntry.CONTENT_ITEM_TYPE;
+			default:
+				throw new UnsupportedOperationException("Unknown uri: " + uri);
+		}
 	}
 
 	@Override
@@ -44,7 +62,7 @@ public class ShoppingListProvider extends ContentProvider {
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-
+		Log.d(getClass().getName(), "Querrying the db" + uri);
 		Cursor retCursor;
 		switch (sUriMatcher.match(uri)) {
 
@@ -60,20 +78,47 @@ public class ShoppingListProvider extends ContentProvider {
 				);
 				break;
 
-			case ITEM:
-				retCursor = dbHelper.getReadableDatabase().query(
-						ItemEntry.TABLE_NAME,
-						projection,
-						selection,
-						selectionArgs,
-						null,
-						null,
-						sortOrder
-				);
+			case ITEM: {
+				String categoryID = ItemEntry.getCategoryIDFromUri(uri);
+				if (categoryID == null || categoryID.isEmpty()) {
+					Log.d(getClass().getName(), "Item");
+					retCursor = dbHelper.getReadableDatabase().query(
+							ItemEntry.TABLE_NAME,
+							projection,
+							selection,
+							selectionArgs,
+							null,
+							null,
+							sortOrder
+					);
+					break;
+				}
+
+				Log.d(getClass().getName(), "Item in category");
+				retCursor = getItemsInCategory(uri, projection, sortOrder, categoryID);
 				break;
 
-			case ITEM_IN_CATEGORY:
-				retCursor = getItemsInCategory(uri, projection, sortOrder);
+			}
+			case ITEM_ID:
+				String idSelection = ItemEntry._ID + " = ?";
+				if (selection == null || selection.isEmpty()) {
+					selection = idSelection;
+					selectionArgs = new String[] {ItemEntry.getItemIDFromUri(uri)};
+				} else {
+					selection += " AND " + idSelection;
+					int originalArgsLength = selectionArgs.length;
+					selectionArgs = Arrays.copyOf(selectionArgs, originalArgsLength+1);
+					selectionArgs[originalArgsLength] = ItemEntry.getItemIDFromUri(uri);
+				}
+				retCursor = dbHelper.getReadableDatabase().query(
+						ItemEntry.TABLE_NAME,
+				        projection,
+				        selection,
+				        selectionArgs,
+				        null,
+				        null,
+				        sortOrder
+				);
 				break;
 
 			default:
@@ -82,20 +127,6 @@ public class ShoppingListProvider extends ContentProvider {
 
 		retCursor.setNotificationUri(getContext().getContentResolver(), uri);
 		return retCursor;
-	}
-
-	@Override
-	public String getType(Uri uri) {
-
-		switch (sUriMatcher.match(uri)) {
-			case CATEGORY:
-				return DatabaseContract.CategoryEntry.CONTENT_TYPE;
-			case ITEM:
-			case ITEM_IN_CATEGORY:
-				return DatabaseContract.ItemEntry.CONTENT_TYPE;
-			default:
-				throw new UnsupportedOperationException("Unknown uri: " + uri);
-		}
 	}
 
 	@Override
@@ -238,9 +269,9 @@ public class ShoppingListProvider extends ContentProvider {
 		return rowsUpdated;
 	}
 
-	private Cursor getItemsInCategory(Uri uri, String[] projection, String sortOrder) {
+	private Cursor getItemsInCategory(Uri uri, String[] projection, String sortOrder, String categoryID) {
 
-		String categoryID = ItemEntry.getCategoryIDFromUri(uri);
+		Log.d(getClass().getName(), "Got category ID: " + categoryID);
 		String categorySelection = ItemEntry.COLUMN_CAT_KEY + "=?";
 
 		return dbHelper.getReadableDatabase().query(

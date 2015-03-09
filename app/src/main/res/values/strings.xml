@@ -4,6 +4,7 @@
 
 	<!--Titles-->
 	<string name="title_activity_add_item">Add Item</string>
+	<string name="title_activity_edit_item">Edit Item</string>
 	<string name ="title_activity_item_listing">Items</string>
 
 	<!--AcionBar actions-->

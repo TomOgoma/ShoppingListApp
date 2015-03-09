@@ -66,12 +66,16 @@ public class DatabaseContract {
 
 		public static Uri buildItemsInCategoryUri(long categoryID) {
 			return CONTENT_URI.buildUpon()
-			                  .appendPath(String.valueOf(categoryID))
-			                  .build();
+					.appendQueryParameter(PATH_CATEGORY, String.valueOf(categoryID))
+			        .build();
+		}
+
+		public static String getItemIDFromUri(Uri uri) {
+			return uri.getPathSegments().get(1);
 		}
 
 		public static String getCategoryIDFromUri(Uri uri) {
-			return uri.getPathSegments().get(1);
+			return uri.getQueryParameter(PATH_CATEGORY);
 		}
 	}
 

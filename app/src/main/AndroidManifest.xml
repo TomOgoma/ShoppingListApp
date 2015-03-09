@@ -27,6 +27,11 @@
 			android:label="@string/title_activity_add_item" >
 		</activity>
 
+		<activity
+			android:name=".items.add.EditItemActivity"
+			android:label="@string/title_activity_edit_item" >
+		</activity>
+
         <provider
             android:name=".data.ShoppingListProvider"
             android:authorities="com.tomogoma.shoppinglistapp" />

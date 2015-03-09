@@ -6,8 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
-import android.widget.EditText;
 
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
@@ -15,11 +13,7 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 /**
  * Created by ogoma on 01/03/15.
  */
-public class AddItem {
-
-	public static long addCategory(Context context, EditText categoryName) {
-		return addCategory(context, categoryName.getText().toString());
-	}
+public class DBUpdateHelper {
 
 	public static long addCategory(Context context, String categoryName) {
 
@@ -50,42 +44,9 @@ public class AddItem {
 		return ContentUris.parseId(categoryInsertUri);
 	}
 
-	public static long addItem(Context context, long categoryID, EditText itemName,
-	                           EditText unitPrice, EditText quantity, EditText lastsFor,
-	                           EditText measUnit, String lastsForUnit, EditText description) {
+	public static long addItem(Context context, Item item) {
 
-
-		double price = 0d;
-		float qtty = 0f, usePerAct = 0f;
-
-		Log.d(AddItem.class.getSimpleName(), "edittext usefulperMeas: " + lastsFor.getText().toString());
-
-		//  Multiple trys to avoid short-circuiting
-		//  Do nothing for number format exceptions (assume empty -> default 0)
-		try {
-			price = Double.parseDouble(unitPrice.getText().toString());
-		}
-		catch (Exception e) {}
-
-		try {
-			qtty = Float.parseFloat(quantity.getText().toString());
-		}
-		catch (Exception e) {}
-
-		try {
-			usePerAct = Float.parseFloat(lastsFor.getText().toString());
-		}
-		catch (Exception e) {}
-
-		return addItem(context, categoryID, itemName.getText().toString(), price, qtty,
-		               measUnit.getText().toString(), lastsForUnit, usePerAct, description.getText().toString());
-	}
-
-	public static long addItem(Context context, long categoryID, String itemName,
-	                           double unitPrice, float quantity, String measUnit, String usefulUnit,
-	                           float usefulUnitsPerActual, String description) {
-
-		if (itemName == null || itemName.isEmpty()) {
+		if (item.mItemName == null || item.mItemName.isEmpty()) {
 			return -1;
 		}
 
@@ -95,7 +56,7 @@ public class AddItem {
 				DatabaseContract.ItemEntry.CONTENT_URI,
 				new String[]{ItemEntry.TABLE_NAME + "." + ItemEntry._ID},
 				DatabaseContract.ItemEntry.COLUMN_NAME + " = ?",
-				new String[]{itemName},
+				new String[]{item.mItemName},
 				null);
 
 		if (cursor.moveToFirst()) {
@@ -108,19 +69,42 @@ public class AddItem {
 		}
 
 		ContentValues contentValues = new ContentValues();
-		contentValues.put(DatabaseContract.ItemEntry.COLUMN_CAT_KEY, categoryID);
-		contentValues.put(DatabaseContract.ItemEntry.COLUMN_NAME, itemName);
-		contentValues.put(ItemEntry.COLUMN_DESC, description);
-		contentValues.put(ItemEntry.COLUMN_PRICE, unitPrice);
-		contentValues.put(ItemEntry.COLUMN_QTTY, quantity);
-		contentValues.put(ItemEntry.COLUMN_MEAS_UNIT, measUnit);
-		contentValues.put(ItemEntry.COLUMN_USEFUL_UNIT, usefulUnit);
-		contentValues.put(ItemEntry.COLUMN_USEFUL_PER_MEAS, usefulUnitsPerActual);
+		contentValues.put(DatabaseContract.ItemEntry.COLUMN_CAT_KEY, item.mCategoryID);
+		contentValues.put(DatabaseContract.ItemEntry.COLUMN_NAME, item.mItemName);
+		contentValues.put(ItemEntry.COLUMN_DESC, item.mDescription);
+		contentValues.put(ItemEntry.COLUMN_PRICE, item.mPrice);
+		contentValues.put(ItemEntry.COLUMN_QTTY, item.mQuantity);
+		contentValues.put(ItemEntry.COLUMN_MEAS_UNIT, item.mMeasUnit);
+		contentValues.put(ItemEntry.COLUMN_USEFUL_UNIT, item.mLastsForUnit);
+		contentValues.put(ItemEntry.COLUMN_USEFUL_PER_MEAS, item.mLastsFor);
 
 		Uri itemInsertUri =
 				contentResolver.insert(DatabaseContract.ItemEntry.CONTENT_URI, contentValues);
 
 		return ContentUris.parseId(itemInsertUri);
+	}
+
+	public static int updateItem(Context context, Item item) {
+
+		if (item.mItemName == null || item.mItemName.isEmpty() || item.mItemID == -1) {
+			return -1;
+		}
+
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DatabaseContract.ItemEntry.COLUMN_CAT_KEY, item.mCategoryID);
+		contentValues.put(DatabaseContract.ItemEntry.COLUMN_NAME, item.mItemName);
+		contentValues.put(ItemEntry.COLUMN_DESC, item.mDescription);
+		contentValues.put(ItemEntry.COLUMN_PRICE, item.mPrice);
+		contentValues.put(ItemEntry.COLUMN_QTTY, item.mQuantity);
+		contentValues.put(ItemEntry.COLUMN_MEAS_UNIT, item.mMeasUnit);
+		contentValues.put(ItemEntry.COLUMN_USEFUL_UNIT, item.mLastsForUnit);
+		contentValues.put(ItemEntry.COLUMN_USEFUL_PER_MEAS, item.mLastsFor);
+
+		String whereClause = ItemEntry._ID + " = ?";
+		String[] whereArgs = new String[]{String.valueOf(item.mItemID)};
+		ContentResolver contentResolver = context.getContentResolver();
+
+		return contentResolver.update(DatabaseContract.ItemEntry.CONTENT_URI, contentValues, whereClause, whereArgs);
 	}
 
 }
