@@ -64,7 +64,7 @@
 		android:layout_toStartOf="@+id/totalPrice"
 		android:layout_centerHorizontal="true"
 		android:gravity="center_horizontal"
-		tools:text="/@ 135.00 KES"
+		tools:text="\@ 135.00 KES"
 		tools:visibility="visible"/>
 
 	<TextView

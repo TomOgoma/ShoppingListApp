@@ -19,18 +19,21 @@
 		android:layout_alignParentTop="true"
 		android:layout_toStartOf="@+id/deleteItem"
 		android:layout_toLeftOf="@+id/deleteItem"
+		android:gravity="center_vertical"
 		tools:text="Toothpaste"/>
 
 	<ImageView
 		android:id="@+id/deleteItem"
 		android:layout_width="42dp"
 		android:layout_height="@dimen/text_view_height"
-		android:paddingTop="0dp"
-		android:paddingBottom="12dp"
+		android:paddingTop="6dp"
+		android:paddingBottom="6dp"
 		android:paddingLeft="12dp"
 		android:paddingStart="12dp"
-		android:paddingRight="12dp"
-		android:paddingEnd="12dp"
+		android:paddingRight="5dp"
+		android:paddingEnd="5dp"
+		android:layout_marginRight="1dp"
+		android:layout_marginEnd="1dp"
 		android:layout_alignParentTop="true"
 		android:layout_toLeftOf="@+id/editItem"
 		android:layout_toStartOf="@+id/editItem"
@@ -41,10 +44,12 @@
 		android:id="@+id/editItem"
 		android:layout_width="42dp"
 		android:layout_height="@dimen/text_view_height"
-		android:paddingTop="0dp"
-		android:paddingBottom="12dp"
-		android:paddingLeft="12dp"
-		android:paddingStart="12dp"
+		android:paddingTop="6dp"
+		android:paddingBottom="6dp"
+		android:paddingLeft="5dp"
+		android:paddingStart="5dp"
+		android:layout_marginLeft="1dp"
+		android:layout_marginStart="1dp"
 		android:paddingRight="12dp"
 		android:paddingEnd="12dp"
 		android:layout_alignParentTop="true"
@@ -64,11 +69,19 @@
 		tools:visibility="visible"
 		android:focusable="false"/>
 
+	<View
+		android:id="@+id/headerMargin"
+		android:layout_width="fill_parent"
+		android:layout_height="1dp"
+		android:layout_below="@+id/editItem"
+		android:layout_marginBottom="@dimen/view_margin_medium"
+		android:background="#e1dbdb" />
+
 	<TextView
 		android:id="@+id/versionName"
 		android:layout_width="wrap_content"
 		android:layout_height="@dimen/text_view_height"
-		android:layout_below="@+id/title"
+		android:layout_below="@+id/headerMargin"
 		android:visibility="gone"
 		tools:text="(Colgate Herbal mint fresh)"
 		tools:visibility="visible"/>
@@ -76,12 +89,12 @@
 	<TextView
 		android:id="@+id/unitPrice"
 		android:layout_width="wrap_content"
-		android:layout_height="@dimen/text_view_height"
-		android:layout_below="@+id/shoppingListAdd"
+		android:layout_height="23dp"
+		android:layout_below="@+id/headerMargin"
 		android:layout_alignParentRight="true"
 		android:layout_alignParentEnd="true"
 		android:gravity="right"
-		tools:text="/@ 135.00 KES"
+		tools:text="\@ 135.00 KES"
 		tools:visibility="visible"/>
 
 	<include
@@ -94,15 +107,27 @@
 		android:layout_alignParentStart="true"
 		android:layout_below="@+id/versionName"/>
 
-	<TextView
-		android:id="@+id/totalPrice"
+	<LinearLayout
+		android:id="@+id/totalPriceLayout"
+		android:orientation="vertical"
 		android:layout_width="wrap_content"
-		android:layout_height="@dimen/text_view_height"
+		android:layout_height="wrap_content"
 		android:layout_alignParentEnd="true"
 		android:layout_alignParentRight="true"
-		android:layout_below="@+id/unitPrice"
-		android:gravity="end"
-		tools:text="675.00 KES"/>
+		android:layout_below="@+id/unitPrice">
+
+		<View
+			android:layout_width="fill_parent"
+			android:layout_height="1dp"
+			android:background="#e1dbdb" />
+
+		<TextView
+			android:id="@+id/totalPrice"
+			android:layout_width="wrap_content"
+			android:layout_height="@dimen/text_view_height"
+			android:gravity="center_vertical"
+			tools:text="675.00 KES"/>
+	</LinearLayout>
 
 	<TextView
 		android:id="@+id/description"
@@ -112,7 +137,7 @@
 		android:paddingBottom="5dp"
 		android:layout_alignParentEnd="true"
 		android:layout_alignParentRight="true"
-		android:layout_below="@+id/totalPrice"
+		android:layout_below="@+id/totalPriceLayout"
 		tools:text="This is the description of Toothpaste, Colgate Herbal Mint fresh"/>
 
 </RelativeLayout>

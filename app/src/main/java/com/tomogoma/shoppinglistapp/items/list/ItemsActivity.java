@@ -7,9 +7,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.tomogoma.shoppinglistapp.R;
+import com.tomogoma.shoppinglistapp.ShoppingListAppActivity;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
-import com.tomogoma.shoppinglistapp.items.add.AddItemActivity;
-import com.tomogoma.util.ui.ShoppingListAppActivity;
+import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity;
 
 
 public abstract class ItemsActivity extends ShoppingListAppActivity {
@@ -18,9 +18,10 @@ public abstract class ItemsActivity extends ShoppingListAppActivity {
 
 	private static final int ADD_ITEM_REQ_CODE = 5034;
 
+	protected boolean mFillCategorySectionOnAdd = true;
 	protected boolean mIsResumingFromAddItemResult = false;
-	protected long mCategoryID = CategoryEntry.DEFAULT_CATEGORY_ID;
-	protected String mCategoryName = CategoryEntry.DEFAULT_CATEGORY_NAME;
+	protected long mCategoryID = CategoryEntry.DEFAULT_ID;
+	protected String mCategoryName = CategoryEntry.DEFAULT_NAME;
 
 	protected abstract void showItems(Bundle arguments);
 
@@ -31,9 +32,9 @@ public abstract class ItemsActivity extends ShoppingListAppActivity {
 		Log.d(getClass().getSimpleName(), "Arguments is empty? " + (arguments == null));
 		if (arguments != null) {
 			mCategoryID = arguments.getLong(ItemsFragment.EXTRA_long_CATEGORY_ID,
-			                                CategoryEntry.DEFAULT_CATEGORY_ID);
+			                                CategoryEntry.DEFAULT_ID);
 			mCategoryName = arguments.getString(ItemsFragment.EXTRA_String_CATEGORY_NAME,
-			                                    CategoryEntry.DEFAULT_CATEGORY_NAME);
+			                                    CategoryEntry.DEFAULT_NAME);
 			Log.d(getClass().getSimpleName(), "Got category name: " + mCategoryName);
 		}
 	}
@@ -64,11 +65,15 @@ public abstract class ItemsActivity extends ShoppingListAppActivity {
 				String categoryName = mCategoryName;
 				Intent addItemIntent = new Intent(this, AddItemActivity.class);
 				addItemIntent.putExtra(AddItemActivity.EXTRA_String_CATEGORY_NAME, categoryName);
-				startActivityForResult(addItemIntent, ADD_ITEM_REQ_CODE);
+				startAddItemActivityForResult(addItemIntent);
 				return true;
 			}
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	protected void startAddItemActivityForResult(Intent addItemIntent) {
+		startActivityForResult(addItemIntent, ADD_ITEM_REQ_CODE);
 	}
 
 	protected Bundle packageCategoryDetails(long categoryID, String categoryName) {
@@ -97,8 +102,6 @@ public abstract class ItemsActivity extends ShoppingListAppActivity {
 				mCategoryName = data.getStringExtra(AddItemActivity.EXTRA_String_CATEGORY_NAME);
 				mCategoryID = data.getLongExtra(AddItemActivity.EXTRA_long_CATEGORY_ID, 1);
 				mIsResumingFromAddItemResult = true;
-			} else {
-				//  TODO act on bad result
 			}
 		}
 		super.onActivityResult(requestCode, resultCode, data);

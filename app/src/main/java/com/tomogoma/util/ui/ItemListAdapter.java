@@ -18,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tomogoma.shoppinglistapp.R;
+import com.tomogoma.shoppinglistapp.data.Currency;
+import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.util.Formatter;
 
@@ -27,15 +29,17 @@ import com.tomogoma.util.Formatter;
 public class ItemListAdapter extends CursorAdapter {
 
 	public static final String[] S_ITEMS_PROJECTION = new String[]{
-			ItemEntry._ID,
-			ItemEntry.COLUMN_NAME,
-			ItemEntry.COLUMN_DESC,
-			ItemEntry.COLUMN_PRICE,
-			ItemEntry.COLUMN_QTTY,
-			ItemEntry.COLUMN_MEAS_UNIT,
-			ItemEntry.COLUMN_USEFUL_UNIT,
-			ItemEntry.COLUMN_USEFUL_PER_MEAS,
-			ItemEntry.COLUMN_IN_LIST
+			ItemEntry.TABLE_NAME + "." + ItemEntry._ID,
+			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_NAME,
+			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_DESC,
+			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_PRICE,
+			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_QUANTITY,
+			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_MEAS_UNIT,
+			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_LASTS_FOR,
+			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_LASTS_FOR_UNIT,
+			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_IN_LIST,
+			CurrencyEntry.TABLE_NAME + "." + CurrencyEntry._ID,
+			CurrencyEntry.TABLE_NAME + "." + CurrencyEntry.COLUMN_LAST_CONVERSION
 	};
 	private static final int ITEM_ID_COL_INDEX = 0;
 	private static final int ITEM_NAME_COL_INDEX = 1;
@@ -46,6 +50,8 @@ public class ItemListAdapter extends CursorAdapter {
 	private static final int ITEM_LASTS_FOR_UNIT_COL_INDEX = 6;
 	private static final int ITEM_LASTS_FOR_COL_INDEX = 7;
 	private static final int ITEM_IN_LIST_COL_INDEX = 8;
+	private static final int CURRENCY_ID_COL_INDEX = 9;
+	private static final int CURRENCY_LATEST_CONVERSION_COL_INDEX = 10;
 
 	private static final int SELECTED_VIEW_TYPE = 0;
 	private static final int NORMAL_VIEW_TYPE = 1;
@@ -70,6 +76,7 @@ public class ItemListAdapter extends CursorAdapter {
 		}
 	}
 
+	private Currency mCurrency;
 	private int mSelectedPosition = -1;
 	private OnEditItemRequestListener mOnEditItemRequestListener;
 	private OnDeleteItemRequestListener mOnDeleteItemRequestListener;
@@ -85,6 +92,11 @@ public class ItemListAdapter extends CursorAdapter {
 	public ItemListAdapter(Activity activity) {
 
 		super(activity, null, 0);
+	}
+
+	public void setCurrency(Currency currency) {
+		Log.d(getClass().getSimpleName(), "Loading preferred currency...");
+		mCurrency = currency;
 	}
 
 	@Override
@@ -131,6 +143,11 @@ public class ItemListAdapter extends CursorAdapter {
 			return;
 		}
 
+		if (mCurrency == null) {
+			Log.d(getClass().getSimpleName(), "Loading default currency...");
+			mCurrency = getDefaultCurrency(mContext);
+		}
+
 		Log.d(getClass().getSimpleName(), "View is a normal view");
 		ViewHolder viewHolder = (ViewHolder) view.getTag();
 
@@ -141,9 +158,13 @@ public class ItemListAdapter extends CursorAdapter {
 		String name = cursor.getString(ITEM_NAME_COL_INDEX);
 		String measUnit = cursor.getString(ITEM_MEAS_UNIT_COL_INDEX);
 
+		String saveTimeCode = cursor.getString(CURRENCY_ID_COL_INDEX);
+		double saveTimeConversion = cursor.getDouble(CURRENCY_LATEST_CONVERSION_COL_INDEX);
+		saveTimeConversion = (saveTimeConversion <= 0)? 1: saveTimeConversion;
+
 		viewHolder.title.setText(name);
 		setQuantity(viewHolder.quantity, viewHolder.measUnit, measUnit, quantity);
-		setPrice(viewHolder.unitPrice, viewHolder.totalPrice, price, quantity);
+		setPrice(viewHolder.unitPrice, viewHolder.totalPrice, price, quantity, saveTimeCode, saveTimeConversion);
 		setInList(viewHolder.isInList, itemID, inList);
 	}
 
@@ -175,11 +196,15 @@ public class ItemListAdapter extends CursorAdapter {
 		String unit = cursor.getString(ITEM_MEAS_UNIT_COL_INDEX);
 		String lastsUnit = cursor.getString(ITEM_LASTS_FOR_UNIT_COL_INDEX);
 
+		String saveTimeCode = cursor.getString(CURRENCY_ID_COL_INDEX);
+		double saveTimeConversion = cursor.getDouble(CURRENCY_LATEST_CONVERSION_COL_INDEX);
+		saveTimeConversion = (saveTimeConversion <= 0)? 1: saveTimeConversion;
+
 		title.setText(name);
 		setDescription(description, desc);
 		setQuantity(quantity, measUnit, unit, qtty);
 		setLastsFor(openingBracket, closingBracket, lastsFor, lastsForUnit, lastsUnit, qtty, lasts);
-		setPrice(unitPrice, totalPrice, price, qtty);
+		setPrice(unitPrice, totalPrice, price, qtty, saveTimeCode, saveTimeConversion);
 		setInList(shoppingListAdd, itemID, inList);
 
 		imgEditItem.setOnClickListener(new OnClickListener() {
@@ -233,7 +258,7 @@ public class ItemListAdapter extends CursorAdapter {
 		view.setText(quantityStr);
 	}
 
-	private void setPrice(TextView tvPrice, TextView tvTotalPrice, double price, float quantity) {
+	private void setPrice(TextView tvPrice, TextView tvTotalPrice, double price, float quantity, String storedCode, double storedConversion) {
 
 		//  if no price to show, hide the price view
 		if (price == 0d) {
@@ -248,9 +273,8 @@ public class ItemListAdapter extends CursorAdapter {
 
 		//  assume total price is for one item if quantity not set
 		quantity = (quantity == 0f)? 1f: quantity;
-
-		String unitPriceStr = Formatter.formatUnitPrice(price);
-		String totalPriceStr = Formatter.formatPrice(price, quantity);
+		String unitPriceStr = Formatter.formatUnitPrice(price, storedCode, storedConversion, mCurrency);
+		String totalPriceStr = Formatter.formatPrice(price, quantity, storedCode, storedConversion, mCurrency);
 
 		tvPrice.setText(unitPriceStr);
 		tvTotalPrice.setText(totalPriceStr);
@@ -311,6 +335,10 @@ public class ItemListAdapter extends CursorAdapter {
 
 		isInList.setChecked(flag);
 		isInList.setOnCheckedChangeListener(new OnCheckListener(itemID));
+	}
+
+	private Currency getDefaultCurrency(Context context) {
+		return new Currency(CurrencyEntry.DEFAULT_CODE, CurrencyEntry.DEFAULT_SYMBOL, 1);
 	}
 
 	private class OnCheckListener implements OnCheckedChangeListener {

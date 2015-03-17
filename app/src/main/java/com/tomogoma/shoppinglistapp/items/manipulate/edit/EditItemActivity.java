@@ -1,10 +1,11 @@
-package com.tomogoma.shoppinglistapp.items.add;
+package com.tomogoma.shoppinglistapp.items.manipulate.edit;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.items.list.CategoryListingActivity;
+import com.tomogoma.shoppinglistapp.items.manipulate.DoneActionActivity;
 
 public class EditItemActivity extends DoneActionActivity {
 
@@ -50,8 +51,10 @@ public class EditItemActivity extends DoneActionActivity {
 		EditItemFragment editItemFragment = (EditItemFragment)
 				getSupportFragmentManager().findFragmentByTag(EditItemFragment.class.getName());
 		Intent result = editItemFragment.processInput();
-		setResult(RESULT_OK, result);
-		finish();
+		if (result != null) {
+			setResult(RESULT_OK, result);
+			finish();
+		}
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.tomogoma.util.ui;
+package com.tomogoma.shoppinglistapp;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,7 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.tomogoma.shoppinglistapp.R;
+import com.tomogoma.util.ui.UIUtils;
 
 /**
  * Created by Tom Ogoma on 08/03/15.
@@ -47,7 +47,8 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 		switch (item.getItemId()) {
 			case  R.id.action_settings: {
 
-				//  TODO implement settings activity
+				Intent intent = new Intent(this, SettingsActivity.class);
+				startActivity(intent);
 				return true;
 			}
 			case android.R.id.home: {

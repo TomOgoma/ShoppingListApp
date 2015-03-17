@@ -1,10 +1,10 @@
-package com.tomogoma.shoppinglistapp.items.add;
+package com.tomogoma.shoppinglistapp.items.manipulate;
 
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.tomogoma.shoppinglistapp.R;
-import com.tomogoma.util.ui.ShoppingListAppActivity;
+import com.tomogoma.shoppinglistapp.ShoppingListAppActivity;
 
 public abstract class DoneActionActivity extends ShoppingListAppActivity {
 

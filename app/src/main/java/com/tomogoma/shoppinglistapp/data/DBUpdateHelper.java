@@ -18,7 +18,7 @@ public class DBUpdateHelper {
 	public static long addCategory(Context context, String categoryName) {
 
 		if (categoryName == null || categoryName.isEmpty()) {
-			categoryName = CategoryEntry.DEFAULT_CATEGORY_NAME;
+			categoryName = CategoryEntry.DEFAULT_NAME;
 		}
 
 		ContentResolver contentResolver = context.getContentResolver();
@@ -73,10 +73,10 @@ public class DBUpdateHelper {
 		contentValues.put(DatabaseContract.ItemEntry.COLUMN_NAME, item.mItemName);
 		contentValues.put(ItemEntry.COLUMN_DESC, item.mDescription);
 		contentValues.put(ItemEntry.COLUMN_PRICE, item.mPrice);
-		contentValues.put(ItemEntry.COLUMN_QTTY, item.mQuantity);
+		contentValues.put(ItemEntry.COLUMN_QUANTITY, item.mQuantity);
 		contentValues.put(ItemEntry.COLUMN_MEAS_UNIT, item.mMeasUnit);
-		contentValues.put(ItemEntry.COLUMN_USEFUL_UNIT, item.mLastsForUnit);
-		contentValues.put(ItemEntry.COLUMN_USEFUL_PER_MEAS, item.mLastsFor);
+		contentValues.put(ItemEntry.COLUMN_LASTS_FOR, item.mLastsForUnit);
+		contentValues.put(ItemEntry.COLUMN_LASTS_FOR_UNIT, item.mLastsFor);
 
 		Uri itemInsertUri =
 				contentResolver.insert(DatabaseContract.ItemEntry.CONTENT_URI, contentValues);
@@ -95,10 +95,10 @@ public class DBUpdateHelper {
 		contentValues.put(DatabaseContract.ItemEntry.COLUMN_NAME, item.mItemName);
 		contentValues.put(ItemEntry.COLUMN_DESC, item.mDescription);
 		contentValues.put(ItemEntry.COLUMN_PRICE, item.mPrice);
-		contentValues.put(ItemEntry.COLUMN_QTTY, item.mQuantity);
+		contentValues.put(ItemEntry.COLUMN_QUANTITY, item.mQuantity);
 		contentValues.put(ItemEntry.COLUMN_MEAS_UNIT, item.mMeasUnit);
-		contentValues.put(ItemEntry.COLUMN_USEFUL_UNIT, item.mLastsForUnit);
-		contentValues.put(ItemEntry.COLUMN_USEFUL_PER_MEAS, item.mLastsFor);
+		contentValues.put(ItemEntry.COLUMN_LASTS_FOR, item.mLastsForUnit);
+		contentValues.put(ItemEntry.COLUMN_LASTS_FOR_UNIT, item.mLastsFor);
 
 		String whereClause = ItemEntry._ID + " = ?";
 		String[] whereArgs = new String[]{String.valueOf(item.mItemID)};

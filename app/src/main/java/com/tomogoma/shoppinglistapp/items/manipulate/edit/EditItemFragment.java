@@ -1,4 +1,4 @@
-package com.tomogoma.shoppinglistapp.items.add;
+package com.tomogoma.shoppinglistapp.items.manipulate.edit;
 
 
 import android.content.Intent;
@@ -16,6 +16,7 @@ import com.tomogoma.shoppinglistapp.data.DBUpdateHelper;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.data.Item;
+import com.tomogoma.shoppinglistapp.items.manipulate.ManipulateItemFragment;
 import com.tomogoma.util.ui.ContentLoader;
 import com.tomogoma.util.ui.ContentLoader.OnLoadFinishedListener;
 import com.tomogoma.util.ui.UIUtils;
@@ -79,20 +80,14 @@ public class EditItemFragment extends ManipulateItemFragment {
 	}
 
 	@Override
-	protected Intent processInput() {
-
-		String itemName = autoTvItemName.getText().toString();
-		String categoryName = autoTvCategoryName.getText().toString();
-
-		if (!validate(categoryName, itemName)) {
-			return null;
-		}
+	protected Intent processInput(String categoryName, String itemName) {
 
 		long categoryID = DBUpdateHelper.addCategory(getActivity(), categoryName);
 
 		if (itemName.isEmpty()) {
-			UIUtils.showToast(getActivity(), "Category: " + categoryName + " is now in place");
-			return packageResultIntent(categoryID, categoryName);
+			UIUtils.showToast(getActivity(), "Cannot modify to an empty item name");
+			autoTvItemName.setError(getString(R.string.missing_item_error_view));
+			return null;
 		}
 
 		int updateCount = DBUpdateHelper.updateItem(
@@ -115,7 +110,7 @@ public class EditItemFragment extends ManipulateItemFragment {
 		String toastMessage =  itemName + " successfully updated";
 
 		if (categoryName.isEmpty()) {
-			categoryName = CategoryEntry.DEFAULT_CATEGORY_NAME;
+			categoryName = CategoryEntry.DEFAULT_NAME;
 			toastMessage += " but placed";
 		}
 
@@ -134,23 +129,23 @@ public class EditItemFragment extends ManipulateItemFragment {
 
 		autoTvItemName.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_NAME)));
 		etUnitPrice.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_PRICE)));
-		etQuantity.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_QTTY)));
+		etQuantity.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_QUANTITY)));
 		etActualMeasUnit.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_MEAS_UNIT)));
-		etLastsFor.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_USEFUL_PER_MEAS)));
+		etLastsFor.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_LASTS_FOR_UNIT)));
 		etDesc.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_DESC)));
 
 		processDependentViewVisibility(etActualMeasUnit);
 
 		UIUtils.hideKeyboard(getActivity(), autoTvCategoryName);
 
-		String lastsFor = itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_NAME));
-		if (lastsFor.equals(getResources().getString(R.string.lasts_day_text))) {
+		String lastsForUnit = itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_LASTS_FOR));
+		if (lastsForUnit.equals(getString(R.string.lasts_day_text))) {
 			rgLastsDays.setChecked(true);
-		} else if  (lastsFor.equals(getResources().getString(R.string.lasts_week_text))) {
+		} else if  (lastsForUnit.equals(getString(R.string.lasts_week_text))) {
 			rgLastsWeeks.setChecked(true);
-		} else if  (lastsFor.equals(getResources().getString(R.string.lasts_month_text))) {
+		} else if  (lastsForUnit.equals(getString(R.string.lasts_month_text))) {
 			rgLastsMonths.setChecked(true);
-		} else if  (lastsFor.equals(getResources().getString(R.string.lasts_year_text))) {
+		} else if  (lastsForUnit.equals(getString(R.string.lasts_year_text))) {
 			rgLastsYears.setChecked(true);
 		}
 	}

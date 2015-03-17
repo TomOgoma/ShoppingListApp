@@ -53,10 +53,10 @@ public class CategoriesFragment extends ListFragment {
 		setRetainInstance(true);
 
 		if (getArguments() == null) {
-			mCurrCategoryID = CategoryEntry.DEFAULT_CATEGORY_ID;
+			mCurrCategoryID = CategoryEntry.DEFAULT_ID;
 		} else {
 			mCurrCategoryID = getArguments().getLong(EXTRA_long_CATEGORY_ID,
-			                                         CategoryEntry.DEFAULT_CATEGORY_ID);
+			                                         CategoryEntry.DEFAULT_ID);
 		}
 	}
 

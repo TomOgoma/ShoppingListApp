@@ -1,4 +1,4 @@
-package com.tomogoma.shoppinglistapp.items.add;
+package com.tomogoma.shoppinglistapp.items.manipulate;
 
 
 import android.content.Intent;
@@ -20,10 +20,10 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.tomogoma.shoppinglistapp.R;
-import com.tomogoma.shoppinglistapp.data.DBUpdateHelper;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
-import com.tomogoma.shoppinglistapp.data.Item;
+import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity;
+import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemFragment;
 import com.tomogoma.util.Formatter;
 import com.tomogoma.util.ui.ContentLoader;
 import com.tomogoma.util.ui.EditTextWithKeyBoardBackEvent;
@@ -61,6 +61,8 @@ public abstract class ManipulateItemFragment
 
 	private SimpleCursorAdapter mItemsAdapter;
 	private SimpleCursorAdapter mCategoriesAdapter;
+
+	protected abstract Intent processInput(String categoryName, String itemName);
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -205,12 +207,22 @@ public abstract class ManipulateItemFragment
 		}
 	}
 
+	public Intent processInput() {
+
+		String itemName = autoTvItemName.getText().toString();
+		String categoryName = autoTvCategoryName.getText().toString();
+		if (!validate(itemName, categoryName)) {
+			return null;
+		}
+		return processInput(categoryName, itemName);
+	}
+
 	protected boolean validate(String categoryName, String itemName) {
 
 		if (categoryName.isEmpty() && itemName.isEmpty()) {
 
-			autoTvItemName.setError("Probably forgot the item's name?");
-			autoTvCategoryName.setError("Nice to have categories, isn't it?");
+			autoTvItemName.setError(getString(R.string.missing_item_error_view));
+			autoTvCategoryName.setError(getString(R.string.missing_category_error_view));
 
 			String errorMessage = "Missing the item name or category name; must enter at least one";
 			UIUtils.showToast(getActivity(), errorMessage);
@@ -219,46 +231,6 @@ public abstract class ManipulateItemFragment
 		}
 
 		return true;
-	}
-
-	protected Intent processInput() {
-
-		String itemName = autoTvItemName.getText().toString();
-		String categoryName = autoTvCategoryName.getText().toString();
-
-		if (!validate(itemName, categoryName)) {
-			return null;
-		}
-
-		long categoryID = DBUpdateHelper.addCategory(getActivity(), categoryName);
-
-		if (itemName.isEmpty()) {
-			UIUtils.showToast(getActivity(), "Category: " + categoryName + " is now in place");
-			return packageResultIntent(categoryID, categoryName);
-		}
-
-		long itemID = DBUpdateHelper.addItem(
-				getActivity(),
-				new Item(categoryID, mLastsForUnit, autoTvItemName, etUnitPrice,
-				         etQuantity, etLastsFor, etActualMeasUnit, etDesc)
-		);
-
-		if (itemID == -1) {
-			//  TODO edit the item?
-			UIUtils.showToast(getActivity(), itemName + " already exists");
-			return null;
-		}
-
-		String toastMessage =  itemName + " successfully created";
-
-		if (categoryName.isEmpty()) {
-			categoryName = CategoryEntry.DEFAULT_CATEGORY_NAME;
-			toastMessage += " but placed";
-		}
-
-		toastMessage += " in the " + categoryName + " category";
-		UIUtils.showToast(getActivity(), toastMessage);
-		return packageResultIntent(categoryID, categoryName);
 	}
 
 	protected Intent packageResultIntent(long categoryID, String categoryName) {
@@ -279,6 +251,10 @@ public abstract class ManipulateItemFragment
 				setLastsForVisibility();
 				break;
 		}
+	}
+
+	protected void setCategoryNameField(String categoryName) {
+		autoTvCategoryName.setText(categoryName);
 	}
 
 	private void setLastsForVisibility() {
@@ -330,6 +306,8 @@ public abstract class ManipulateItemFragment
 				CategoryEntry.COLUMN_NAME
 		);
 
+		mItemsAdapter.getStringConversionColumn();
+
 		autoTvCategoryName = (AutoCompleteTextView) rootView.findViewById(R.id.categoryName);
 		autoTvItemName = (AutoCompleteTextView) rootView.findViewById(R.id.itemName);
 
@@ -378,8 +356,8 @@ public abstract class ManipulateItemFragment
 		etActualMeasUnit.setOnEditTextImeBackListener(this);
 
 		String categoryName = getArguments().getString(
-				AddItemFragment.EXTRA_String_CATEGORY_NAME, CategoryEntry.DEFAULT_CATEGORY_NAME);
-		autoTvCategoryName.setText(categoryName);
+				AddItemFragment.EXTRA_String_CATEGORY_NAME, CategoryEntry.DEFAULT_NAME);
+		setCategoryNameField(categoryName);
 	}
 
 }

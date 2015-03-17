@@ -16,25 +16,31 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-		<activity
-			android:name=".items.list.ItemListingActivity"
-			android:label="@string/title_activity_item_listing" >
-		</activity>
-
-		<activity
-			android:name=".items.add.AddItemActivity"
-			android:label="@string/title_activity_add_item" >
-		</activity>
-
-		<activity
-			android:name=".items.add.EditItemActivity"
-			android:label="@string/title_activity_edit_item" >
-		</activity>
+        <activity
+            android:name=".items.list.ItemListingActivity"
+            android:label="@string/title_activity_item_listing" >
+        </activity>
+        <activity
+            android:name=".items.manipulate.add.AddItemActivity"
+            android:label="@string/title_activity_add_item" >
+        </activity>
+        <activity
+            android:name=".items.manipulate.edit.EditItemActivity"
+            android:label="@string/title_activity_edit_item" >
+        </activity>
 
         <provider
             android:name=".data.ShoppingListProvider"
             android:authorities="com.tomogoma.shoppinglistapp" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".items.list.CategoryListingActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.tomogoma.shoppinglistapp.items.list.CategoryListingActivity" />
+        </activity>
     </application>
 
 </manifest>

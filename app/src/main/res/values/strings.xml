@@ -12,6 +12,10 @@
 	<string name="action_add">Add</string>
 	<string name="action_done">Done</string>
 
+	<!--Toasts-->
+	<string name="missing_item_error_view">Probably forgot the item\'s name?</string>
+	<string name="missing_category_error_view">Nice to have categories, isn\'t it?</string>
+
 	<!--Strings for views-->
 	<string name="item_name_hint">item name</string>
 	<string name="item_name_hint_detail">item name e.g. Toothpaste, Barsoap...</string>
