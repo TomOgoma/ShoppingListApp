@@ -12,14 +12,14 @@ import android.view.ViewGroup;
 import android.widget.RadioButton;
 
 import com.tomogoma.shoppinglistapp.R;
+import com.tomogoma.shoppinglistapp.data.ContentLoader;
+import com.tomogoma.shoppinglistapp.data.ContentLoader.OnLoadFinishedListener;
 import com.tomogoma.shoppinglistapp.data.DBUpdateHelper;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.data.Item;
 import com.tomogoma.shoppinglistapp.items.manipulate.ManipulateItemFragment;
-import com.tomogoma.util.ui.ContentLoader;
-import com.tomogoma.util.ui.ContentLoader.OnLoadFinishedListener;
-import com.tomogoma.util.ui.UIUtils;
+import com.tomogoma.util.UIUtils;
 
 public class EditItemFragment extends ManipulateItemFragment {
 

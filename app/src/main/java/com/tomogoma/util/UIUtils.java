@@ -1,4 +1,4 @@
-package com.tomogoma.util.ui;
+package com.tomogoma.util;
 
 import android.content.Context;
 import android.view.Gravity;

@@ -7,7 +7,7 @@ import com.tomogoma.shoppinglistapp.data.DBUpdateHelper;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.Item;
 import com.tomogoma.shoppinglistapp.items.manipulate.ManipulateItemFragment;
-import com.tomogoma.util.ui.UIUtils;
+import com.tomogoma.util.UIUtils;
 
 public class AddItemFragment extends ManipulateItemFragment {
 

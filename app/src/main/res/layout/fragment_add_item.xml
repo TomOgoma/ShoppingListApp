@@ -104,7 +104,7 @@
 			android:text="@string/brand_hint_detail"
 			android:visibility="gone"/>
 
-		<com.tomogoma.util.ui.EditTextWithKeyBoardBackEvent
+		<com.tomogoma.shoppinglistapp.EditTextWithKeyBoardBackEvent
 			android:id="@+id/brandName"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
 			android:text="@string/meas_unit_hint_detail"
 			android:visibility="gone"/>
 
-		<com.tomogoma.util.ui.EditTextWithKeyBoardBackEvent
+		<com.tomogoma.shoppinglistapp.EditTextWithKeyBoardBackEvent
 			android:id="@+id/measUnit"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

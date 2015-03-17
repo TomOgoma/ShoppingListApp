@@ -1,4 +1,4 @@
-package com.tomogoma.util.ui;
+package com.tomogoma.shoppinglistapp;
 
 import android.content.Context;
 import android.util.AttributeSet;

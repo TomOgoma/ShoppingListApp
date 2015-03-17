@@ -11,10 +11,10 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.tomogoma.shoppinglistapp.R;
+import com.tomogoma.shoppinglistapp.data.ContentLoader;
+import com.tomogoma.shoppinglistapp.data.ContentLoader.OnLoadFinishedListener;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
-import com.tomogoma.util.ui.ContentLoader;
-import com.tomogoma.util.ui.ContentLoader.OnLoadFinishedListener;
 
 import java.util.HashMap;
 

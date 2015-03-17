@@ -10,7 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.tomogoma.util.ui.UIUtils;
+import com.tomogoma.util.UIUtils;
 
 /**
  * Created by Tom Ogoma on 08/03/15.
