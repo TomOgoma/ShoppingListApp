@@ -18,24 +18,27 @@
 
 	<!--Strings for views-->
 	<string name="item_name_hint">item name</string>
-	<string name="item_name_hint_detail">item name e.g. Toothpaste, Barsoap...</string>
+	<string name="item_name_hint_detail">item name e.g. Toothpaste, Bar-soap…</string>
 	<string name="item_category_hint">item category</string>
-	<string name="item_category_hint_detail">item category e.g. Foodstuff, Bathroom...</string>
+	<string name="item_category_hint_detail">item category e.g. Foodstuff, Bathroom…</string>
 	<string name="brand_hint">brand</string>
-	<string name="brand_hint_detail">brand e.g. Colgate, Aquafresh...</string>
+	<string name="brand_hint_detail">brand e.g. Colgate, Aquafresh…</string>
 	<string name="brand_version_hint">branded version</string>
-	<string name="brand_version_hint_detail">branded version e.g. (for Colgate) Max Spicy, Classic...</string>
+	<string name="brand_version_hint_detail">branded version e.g. (for Colgate) Max Spicy, Classic…</string>
 	<string name="meas_unit_hint">measurement unit</string>
-	<string name="meas_unit_hint_detail">factory measurement unit e.g. Kg, Gram, packet... (use singular)</string>
+	<string name="meas_unit_hint_detail">factory measurement unit e.g. Kg, Gram, packet… (use singular)</string>
 	<string name="price_hint">unit price</string>
-	<string name="price_hint_detail" formatted="false">unit price e.g. if 1%s cost 200, enter 200</string>
+	<string name="price_hint_detail">unit price e.g. if 1<xliff:g id="measUnit">%s</xliff:g> cost 200, enter 200</string>
 	<string name="quantity_hint">quantity to purchase</string>
-	<string name="quantity_hint_detail" formatted="false">quantity to purchase e.g. if to purchase 2%s, enter 2</string>
+	<string name="quantity_hint_detail">quantity to purchase e.g. if to purchase 2<xliff:g id="measUnit">%s</xliff:g>, enter 2</string>
 	<string name="useful_unit_hint">usefulness measurement unit</string>
-    <string name="useful_unit_hint_detail" formatted="false">useful unit. Can be Roll, Week... (Use singular) e.g. if 1%s lasts 2Months,
-		enter Month</string>
+    <string name="useful_unit_hint_detail">
+		useful unit. Can be Roll, Week… (Use singular) e.g. if 1<xliff:g id="measUnit">%s</xliff:g> lasts 2Months, enter Month
+	</string>
 	<string name="useful_per_actual_hint">...</string>
-	<string name="useful_per_actual_hint_detail" formatted="false">How long it lasts (estimate) e.g. if 1%s lasts 2%s, enter 2</string>
+	<string name="useful_per_actual_hint_detail">
+		How long it lasts (estimate) e.g. if 1<xliff:g id="measUnit">%s</xliff:g> lasts 2<xliff:g id="lastsUnit">%s</xliff:g>, enter 2
+	</string>
 	<string name="description_hint">description</string>
 	<string name="description_hint_detail">description</string>
 	<string name="more_text">more...</string>
