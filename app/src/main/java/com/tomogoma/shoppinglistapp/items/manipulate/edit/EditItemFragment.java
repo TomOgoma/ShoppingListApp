@@ -19,7 +19,7 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.data.Item;
 import com.tomogoma.shoppinglistapp.items.manipulate.ManipulateItemFragment;
-import com.tomogoma.util.UIUtils;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 public class EditItemFragment extends ManipulateItemFragment {
 
@@ -54,7 +54,7 @@ public class EditItemFragment extends ManipulateItemFragment {
 	                         Bundle savedInstanceState) {
 
 		if (mItemID <= 0) {
-			UIUtils.showToast(getActivity(), "An error occured loading data, please try again");
+			UI.showToast(getActivity(), "An error occured loading data, please try again");
 		}
 		mRootView = super.onCreateView(inflater, container, savedInstanceState);
 		return mRootView;
@@ -85,7 +85,7 @@ public class EditItemFragment extends ManipulateItemFragment {
 		long categoryID = DBUpdateHelper.addCategory(getActivity(), categoryName);
 
 		if (itemName.isEmpty()) {
-			UIUtils.showToast(getActivity(), "Cannot modify to an empty item name");
+			UI.showToast(getActivity(), "Cannot modify to an empty item name");
 			autoTvItemName.setError(getString(R.string.missing_item_error_view));
 			return null;
 		}
@@ -96,11 +96,11 @@ public class EditItemFragment extends ManipulateItemFragment {
 		);
 
 		if (updateCount <0) {
-			UIUtils.showToast(getActivity(), "An error occurred  try again");
+			UI.showToast(getActivity(), "An error occurred  try again");
 			return null;
 		} else if (updateCount == 0) {
 			//  TODO edit the item?
-			UIUtils.showToast(getActivity(), itemName + " not updated try again");
+			UI.showToast(getActivity(), itemName + " not updated try again");
 			return null;
 		} else if (updateCount > 1) {
 			//  TODO log this event
@@ -115,7 +115,7 @@ public class EditItemFragment extends ManipulateItemFragment {
 		}
 
 		toastMessage += " in the " + categoryName + " category";
-		UIUtils.showToast(getActivity(), toastMessage);
+		UI.showToast(getActivity(), toastMessage);
 		return packageResultIntent(categoryID, categoryName);
 	}
 
@@ -136,7 +136,7 @@ public class EditItemFragment extends ManipulateItemFragment {
 
 		processDependentViewVisibility(etActualMeasUnit);
 
-		UIUtils.hideKeyboard(getActivity(), autoTvCategoryName);
+		UI.hideKeyboard(getActivity(), autoTvCategoryName);
 
 		String lastsForUnit = itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_LASTS_FOR));
 		if (lastsForUnit.equals(getString(R.string.lasts_day_text))) {

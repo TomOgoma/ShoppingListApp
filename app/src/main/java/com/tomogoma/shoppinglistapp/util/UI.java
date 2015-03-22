@@ -1,4 +1,4 @@
-package com.tomogoma.util;
+package com.tomogoma.shoppinglistapp.util;
 
 import android.content.Context;
 import android.view.Gravity;
@@ -9,7 +9,7 @@ import android.widget.Toast;
 /**
  * Created by Tom Ogoma on 05/03/15.
  */
-public class UIUtils {
+public class UI {
 
 	public static void hideKeyboard(Context context, View v) {
 

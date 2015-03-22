@@ -1,4 +1,4 @@
-package com.tomogoma.util;
+package com.tomogoma.shoppinglistapp.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,14 +11,14 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 /**
  * Created by Tom Ogoma on 20/03/15.
  */
-public class PreferenceUtils {
+public class Preference {
 
 	/**
 	 *  Fraction of sync interval by which the flexible sync interval is recommended
 	 */
 	public static final int SYNC_FLEXTIME_DIVIDER = 3;
 
-	private static final String LOG_TAG = PreferenceUtils.class.getSimpleName();
+	private static final String LOG_TAG = Preference.class.getSimpleName();
 
 	public static long getPreferredCurrencyID(Context context) {
 

@@ -20,7 +20,7 @@ import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.Currency;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
-import com.tomogoma.util.Formatter;
+import com.tomogoma.shoppinglistapp.util.Formatter;
 
 /**
  * Created by ogoma on 24/02/15.

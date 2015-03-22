@@ -24,8 +24,8 @@ import com.tomogoma.shoppinglistapp.items.ItemListAdapter;
 import com.tomogoma.shoppinglistapp.items.ItemListAdapter.OnDeleteItemRequestListener;
 import com.tomogoma.shoppinglistapp.items.ItemListAdapter.OnEditItemRequestListener;
 import com.tomogoma.shoppinglistapp.items.manipulate.edit.EditItemActivity;
-import com.tomogoma.util.PreferenceUtils;
-import com.tomogoma.util.UIUtils;
+import com.tomogoma.shoppinglistapp.util.Preference;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 /**
  * Created by ogoma on 01/03/15.
@@ -86,7 +86,7 @@ public class ItemsFragment extends Fragment
 		Uri itemUri = ItemEntry.buildItemsInCategoryUri(mCategoryID, true);
 		String[] itemProjection = ItemListAdapter.S_ITEMS_PROJECTION;
 
-		long preferredCurrencyID = PreferenceUtils.getPreferredCurrencyID(getActivity());
+		long preferredCurrencyID = Preference.getPreferredCurrencyID(getActivity());
 		Uri currencyUri = CurrencyEntry.buildCurrencyUri(preferredCurrencyID);
 		String[] currencyProjection = new String[] {
 				CurrencyEntry.COLUMN_SYMBOL,
@@ -138,11 +138,11 @@ public class ItemsFragment extends Fragment
 		int count = contentResolver.delete(ItemEntry.CONTENT_URI, whereClause, whereArgs);
 		//  TODO do not delete immediately, archive and allow undo
 		if (count==0) {
-			UIUtils.showToast(getActivity(), "failed to delete the item, please try again");
+			UI.showToast(getActivity(), "failed to delete the item, please try again");
 		} else if (count>1) {
-			UIUtils.showToast(getActivity(), "Whoaaa! I may have screwed up, please check that your data is okay");
+			UI.showToast(getActivity(), "Whoaaa! I may have screwed up, please check that your data is okay");
 		} else {
-			UIUtils.showToast(getActivity(), "Successfully deleted " + itemName);
+			UI.showToast(getActivity(), "Successfully deleted " + itemName);
 		}
 	}
 

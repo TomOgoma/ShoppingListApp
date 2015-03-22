@@ -28,8 +28,8 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity;
 import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemFragment;
-import com.tomogoma.util.Formatter;
-import com.tomogoma.util.UIUtils;
+import com.tomogoma.shoppinglistapp.util.Formatter;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 public abstract class ManipulateItemFragment
 		extends Fragment
@@ -225,7 +225,7 @@ public abstract class ManipulateItemFragment
 			autoTvCategoryName.setError(getString(R.string.missing_category_error_view));
 
 			String errorMessage = "Missing the item name or category name; must enter at least one";
-			UIUtils.showToast(getActivity(), errorMessage);
+			UI.showToast(getActivity(), errorMessage);
 
 			return false;
 		}

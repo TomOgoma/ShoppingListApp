@@ -1,4 +1,4 @@
-package com.tomogoma.util;
+package com.tomogoma.shoppinglistapp.util;
 
 import com.tomogoma.shoppinglistapp.data.Currency;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;

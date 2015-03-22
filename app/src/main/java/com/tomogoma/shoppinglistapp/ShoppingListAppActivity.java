@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.tomogoma.shoppinglistapp.settings.SettingsActivity;
-import com.tomogoma.util.UIUtils;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 /**
  * Created by Tom Ogoma on 08/03/15.
@@ -104,7 +104,7 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 	 */
 	protected void replaceFragment(int containerID, Fragment withFragment) {
 
-		UIUtils.hideKeyboard(this, getCurrentFocus());
+		UI.hideKeyboard(this, getCurrentFocus());
 		setTitle(getResources().getString(R.string.app_name));
 		getSupportFragmentManager()
 				.beginTransaction()

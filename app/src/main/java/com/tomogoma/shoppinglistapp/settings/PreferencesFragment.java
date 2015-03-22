@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
@@ -23,8 +22,8 @@ import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.Currency;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.sync.SyncAdapter;
-import com.tomogoma.util.Formatter;
-import com.tomogoma.util.PreferenceUtils;
+import com.tomogoma.shoppinglistapp.util.Formatter;
+import com.tomogoma.shoppinglistapp.util.Preference;
 
 /**
  * Created by Tom Ogoma on 20/03/15.
@@ -185,12 +184,12 @@ public class PreferencesFragment extends PreferenceFragment
 		mCurrencyPreference.setDefaultValue(String.valueOf(CurrencyEntry.DEFAULT_ID));
 	}
 
-	private static Preference.OnPreferenceChangeListener
+	private static android.preference.Preference.OnPreferenceChangeListener
 			sBindPreferenceSummaryToValueListener
-			= new Preference.OnPreferenceChangeListener() {
+			= new android.preference.Preference.OnPreferenceChangeListener() {
 
 		@Override
-		public boolean onPreferenceChange(Preference preference, Object value) {
+		public boolean onPreferenceChange(android.preference.Preference preference, Object value) {
 
 			String stringValue = value.toString();
 
@@ -217,7 +216,7 @@ public class PreferencesFragment extends PreferenceFragment
 					else if (preference.getKey().equals(syncKey)) {
 						Context context = preference.getContext();
 						int syncInterval = Integer.parseInt(stringValue) * 60;
-						int syncFlexTime = PreferenceUtils.getPreferredSyncFlexInterval(context, syncInterval);
+						int syncFlexTime = Preference.getPreferredSyncFlexInterval(context, syncInterval);
 						SyncAdapter.configurePeriodicSync(context, syncInterval, syncFlexTime);
 					}
 				}
@@ -271,7 +270,7 @@ public class PreferencesFragment extends PreferenceFragment
 	 *
 	 * @see #sBindPreferenceSummaryToValueListener
 	 */
-	private static void bindPreferenceSummaryToValue(Preference preference) {
+	private static void bindPreferenceSummaryToValue(android.preference.Preference preference) {
 
 		sIsBindingPreference = true;
 		preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);

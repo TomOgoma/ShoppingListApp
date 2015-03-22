@@ -7,7 +7,7 @@ import com.tomogoma.shoppinglistapp.data.DBUpdateHelper;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.Item;
 import com.tomogoma.shoppinglistapp.items.manipulate.ManipulateItemFragment;
-import com.tomogoma.util.UIUtils;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 public class AddItemFragment extends ManipulateItemFragment {
 
@@ -36,7 +36,7 @@ public class AddItemFragment extends ManipulateItemFragment {
 		long categoryID = DBUpdateHelper.addCategory(getActivity(), categoryName);
 
 		if (itemName.isEmpty()) {
-			UIUtils.showToast(getActivity(), "Category: " + categoryName + " is now in place");
+			UI.showToast(getActivity(), "Category: " + categoryName + " is now in place");
 			return packageResultIntent(categoryID, categoryName);
 		}
 
@@ -48,7 +48,7 @@ public class AddItemFragment extends ManipulateItemFragment {
 
 		if (itemID == -1) {
 			//  TODO edit the item?
-			UIUtils.showToast(getActivity(), itemName + " already exists");
+			UI.showToast(getActivity(), itemName + " already exists");
 			return null;
 		}
 
@@ -60,7 +60,7 @@ public class AddItemFragment extends ManipulateItemFragment {
 		}
 
 		toastMessage += " in the " + categoryName + " category";
-		UIUtils.showToast(getActivity(), toastMessage);
+		UI.showToast(getActivity(), toastMessage);
 		return packageResultIntent(categoryID, categoryName);
 	}
 

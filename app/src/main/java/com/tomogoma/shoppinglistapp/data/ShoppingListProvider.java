@@ -13,7 +13,7 @@ import android.util.Log;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
-import com.tomogoma.util.PreferenceUtils;
+import com.tomogoma.shoppinglistapp.util.Preference;
 
 import java.util.Arrays;
 
@@ -349,7 +349,7 @@ public class ShoppingListProvider extends ContentProvider {
 	private void addCurrencyIDToItemValues(ContentValues values) {
 
 		if (!values.containsKey(ItemEntry.COLUMN_CURRENCY_KEY)) {
-			long preferredCurrencyID = PreferenceUtils.getPreferredCurrencyID(getContext());
+			long preferredCurrencyID = Preference.getPreferredCurrencyID(getContext());
 			values.put(ItemEntry.COLUMN_CURRENCY_KEY, preferredCurrencyID);
 		}
 	}

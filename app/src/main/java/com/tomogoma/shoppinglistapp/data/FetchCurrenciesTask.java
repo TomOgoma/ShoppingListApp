@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
-import com.tomogoma.util.UIUtils;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,7 +81,7 @@ public class FetchCurrenciesTask  extends AsyncTask<Void, String, Void> {
 
 	@Override
 	protected void onProgressUpdate(String... values) {
-		UIUtils.showToast(mContext, values[0]);
+		UI.showToast(mContext, values[0]);
 	}
 
 	@Override

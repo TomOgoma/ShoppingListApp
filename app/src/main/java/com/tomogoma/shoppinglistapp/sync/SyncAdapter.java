@@ -21,7 +21,7 @@ import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
-import com.tomogoma.util.PreferenceUtils;
+import com.tomogoma.shoppinglistapp.util.Preference;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -137,7 +137,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 		ContentResolver contentResolver = getContext().getContentResolver();
 
-		long prefdCurrencyID = PreferenceUtils.getPreferredCurrencyID(getContext());
+		long prefdCurrencyID = Preference.getPreferredCurrencyID(getContext());
 		Cursor cursor = contentResolver.query(
 				CurrencyEntry.buildCurrencyUri(prefdCurrencyID),
 				WATCHED_CURRENCIES_PROJECTION,
@@ -337,8 +337,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 	private static void onAccountCreated(Account newAccount, Context context) {
 
-		int syncInterval = PreferenceUtils.getPreferredSyncInterval(context);
-		int syncFlexTime = PreferenceUtils.getPreferredSyncFlexInterval(context, syncInterval);
+		int syncInterval = Preference.getPreferredSyncInterval(context);
+		int syncFlexTime = Preference.getPreferredSyncFlexInterval(context, syncInterval);
 		SyncAdapter.configurePeriodicSync(context, syncInterval, syncFlexTime);
 		ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.content_authority), true);
 		syncImmediately(context);
