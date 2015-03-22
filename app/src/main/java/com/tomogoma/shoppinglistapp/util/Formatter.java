@@ -3,6 +3,9 @@ package com.tomogoma.shoppinglistapp.util;
 import com.tomogoma.shoppinglistapp.data.Currency;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 /**
  * Created by ogoma on 24/02/15.
  */
@@ -10,6 +13,8 @@ public class Formatter {
 
 	private static final String LOG_TAG = Formatter.class.getSimpleName();
 	private static final boolean ACCEPT_ZERO = false;
+
+	private static NumberFormat sNumberFormat = NumberFormat.getInstance();
 
 	public static String formatPrice(Double unitPrice, float quantity, String boundCode,
 	                                 double boundConversion, Currency preferredCurrency) {
@@ -41,9 +46,18 @@ public class Formatter {
 			}
 		}
 
+		java.util.Currency currency = java.util.Currency.getInstance(preferredCode);
+		sNumberFormat.setCurrency(currency);
+		sNumberFormat.setGroupingUsed(true);
+		sNumberFormat.setMaximumFractionDigits(2);
+		sNumberFormat.setMinimumFractionDigits(2);
+		if (sNumberFormat instanceof DecimalFormat) {
+			((DecimalFormat) sNumberFormat).setDecimalSeparatorAlwaysShown(true);
+			((DecimalFormat) sNumberFormat).setGroupingSize(3);
+		}
 		return new StringBuilder()
-				.append(String.format("%.2f", price))
 				.append(formatCurrency(preferredCurrency))
+				.append(sNumberFormat.format(price))
 				.toString();
 	}
 
@@ -54,7 +68,7 @@ public class Formatter {
 			return "-/-";
 		}
 
-		return "@" + formatPrice(price, boundCode, boundConversion, preferredCurrency);
+		return "@ " + formatPrice(price, boundCode, boundConversion, preferredCurrency);
 	}
 
 	public static String formatQuantity(float quantity) {
@@ -69,7 +83,7 @@ public class Formatter {
 	public static String formatMeasUnit(String measUnit) {
 
 		if (measUnit == null || measUnit.isEmpty()) {
-			return "[Item]";
+			return "[Items]";
 		}
 
 		return measUnit;
@@ -78,19 +92,26 @@ public class Formatter {
 	public static String formatCurrency(Currency currency) {
 
 		String symbol = currency.getSymbol();
-		if (symbol == null || symbol.isEmpty()) {
+		if (symbol.isEmpty()) {
 			return currency.getCode();
 		}
 		return symbol;
 	}
 
-	public static String formatLongCurrency(Currency currency) {
+	public static String formatLongCurrency(Currency currency, boolean includeCountry) {
 
-		return new StringBuilder(currency.getName())
+		StringBuilder longCurrencyBuilder = new StringBuilder(currency.getName())
 				.append(" (")
 				.append(formatCurrency(currency))
-				.append(")")
-				.toString();
+				.append(")");
+
+		if (includeCountry) {
+			longCurrencyBuilder
+					.append(" - ")
+					.append(currency.getCountry());
+		}
+
+		return longCurrencyBuilder.toString();
 	}
 
 }

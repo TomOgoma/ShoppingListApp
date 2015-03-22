@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,8 @@ import com.tomogoma.shoppinglistapp.util.UI;
 public class EditItemFragment extends ManipulateItemFragment {
 
 	public static final String EXTRA_long_ITEM_ID = EditItemFragment.class.getName() + "_extra.category.id";
+
+	private static final String LOG_TAG = EditItemFragment.class.getSimpleName();
 
 	private long mItemID = -1;
 	private long mItemLoaderID = -1;
@@ -54,7 +57,8 @@ public class EditItemFragment extends ManipulateItemFragment {
 	                         Bundle savedInstanceState) {
 
 		if (mItemID <= 0) {
-			UI.showToast(getActivity(), "An error occured loading data, please try again");
+			Log.e(LOG_TAG, "Failed to fetch the item ID to be edited");
+			UI.showKeyboardToast(getActivity(), getString(R.string.error_toast_loading_data));
 		}
 		mRootView = super.onCreateView(inflater, container, savedInstanceState);
 		return mRootView;
@@ -85,8 +89,8 @@ public class EditItemFragment extends ManipulateItemFragment {
 		long categoryID = DBUpdateHelper.addCategory(getActivity(), categoryName);
 
 		if (itemName.isEmpty()) {
-			UI.showToast(getActivity(), "Cannot modify to an empty item name");
-			autoTvItemName.setError(getString(R.string.missing_item_error_view));
+			UI.showKeyboardToast(getActivity(), getString(R.string.error_toast_missing_item_name));
+			autoTvItemName.setError(getString(R.string.error_inputViewErr_missing_item));
 			return null;
 		}
 
@@ -96,26 +100,30 @@ public class EditItemFragment extends ManipulateItemFragment {
 		);
 
 		if (updateCount <0) {
-			UI.showToast(getActivity(), "An error occurred  try again");
+			Log.e(LOG_TAG, "Error updating db");
+			String message = getString(R.string.error_toast_db_update_fail);
+			UI.showKeyboardToast(getActivity(), String.format(message, itemName));
 			return null;
 		} else if (updateCount == 0) {
 			//  TODO edit the item?
-			UI.showToast(getActivity(), itemName + " not updated try again");
+			Log.e(LOG_TAG, "Error updating db");
+			String message = getString(R.string.error_toast_db_update_fail);
+			UI.showKeyboardToast(getActivity(), String.format(message, itemName));
 			return null;
 		} else if (updateCount > 1) {
-			//  TODO log this event
-			throw new RuntimeException("Unexpected scenario");
+			Log.e(LOG_TAG, "Updated more than one item; expected single update; count=" + updateCount);
+			UI.showKeyboardToast(getActivity(), getString(R.string.error_toast_db_potential_data_corruption));
+			throw new RuntimeException("Updated more items than expected in db" + updateCount);
 		}
-
-		String toastMessage =  itemName + " successfully updated";
-
+		String butPlaced = "";
 		if (categoryName.isEmpty()) {
 			categoryName = CategoryEntry.DEFAULT_NAME;
-			toastMessage += " but placed";
+			butPlaced = getString(R.string.toast_but_placed);
 		}
 
-		toastMessage += " in the " + categoryName + " category";
-		UI.showToast(getActivity(), toastMessage);
+		String toastMessage = getString(R.string.toast_item_updated);
+		toastMessage = String.format(toastMessage, itemName, butPlaced, categoryName);
+		UI.showKeyboardToast(getActivity(), toastMessage);
 		return packageResultIntent(categoryID, categoryName);
 	}
 

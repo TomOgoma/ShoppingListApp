@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,6 +22,7 @@ import com.tomogoma.shoppinglistapp.data.Currency;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.util.Formatter;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 /**
  * Created by ogoma on 24/02/15.
@@ -137,7 +139,7 @@ public class ItemListAdapter extends CursorAdapter {
 		}
 
 		if (mCurrency == null) {
-			mCurrency = getDefaultCurrency(mContext);
+			fallBackToDefaultCurrency();
 		}
 
 		ViewHolder viewHolder = (ViewHolder) view.getTag();
@@ -160,6 +162,10 @@ public class ItemListAdapter extends CursorAdapter {
 	}
 
 	private void bindExpandedView(View view, final Context context, Cursor cursor) {
+
+		if (mCurrency == null) {
+			fallBackToDefaultCurrency();
+		}
 
 		TextView title = (TextView) view.findViewById(R.id.title);
 		ImageView imgEditItem = (ImageView) view.findViewById(R.id.editItem);
@@ -328,8 +334,15 @@ public class ItemListAdapter extends CursorAdapter {
 		isInList.setOnCheckedChangeListener(new OnCheckListener(itemID));
 	}
 
-	private Currency getDefaultCurrency(Context context) {
-		return new Currency(CurrencyEntry.DEFAULT_CODE, CurrencyEntry.DEFAULT_SYMBOL, 1);
+	private void fallBackToDefaultCurrency() {
+		Log.e(LOG_TAG, "Failed to load preferred currency");
+		UI.showToast(mContext, mContext.getString(R.string.error_toast_fetch_preferred_currency_too_late));
+		mCurrency = new Currency(
+				CurrencyEntry.DEFAULT_CODE,
+				CurrencyEntry.DEFAULT_SYMBOL,
+				CurrencyEntry.DEFAULT_NAME,
+				CurrencyEntry.DEFAULT_COUNTRY
+			);
 	}
 
 	private class OnCheckListener implements OnCheckedChangeListener {

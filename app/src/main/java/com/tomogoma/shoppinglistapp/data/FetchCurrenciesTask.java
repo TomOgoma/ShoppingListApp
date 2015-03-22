@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.util.UI;
 
@@ -40,8 +41,6 @@ public class FetchCurrenciesTask  extends AsyncTask<Void, String, Void> {
 		final String FCCA_COUNTRY = "name";
 
 		final String FCCA_LIST = "results";
-
-		Log.d(LOG_TAG, currencyJsonStr.substring(0, 100));
 
 		JSONObject currenciesObject = new JSONObject(currencyJsonStr).getJSONObject(FCCA_LIST);
 		Iterator<String> currenciesIterator = currenciesObject.keys();
@@ -81,7 +80,7 @@ public class FetchCurrenciesTask  extends AsyncTask<Void, String, Void> {
 
 	@Override
 	protected void onProgressUpdate(String... values) {
-		UI.showToast(mContext, values[0]);
+		UI.showKeyboardToast(mContext, values[0]);
 	}
 
 	@Override
@@ -103,7 +102,7 @@ public class FetchCurrenciesTask  extends AsyncTask<Void, String, Void> {
 			InputStream inputStream = urlConnection.getInputStream();
 			StringBuffer buffer = new StringBuffer();
 			if (inputStream == null) {
-				Log.d(LOG_TAG, "Null input stream :(");
+				Log.e(LOG_TAG, "Null input stream :(");
 				return null;
 			}
 			reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -114,14 +113,14 @@ public class FetchCurrenciesTask  extends AsyncTask<Void, String, Void> {
 			}
 
 			if (buffer.length() == 0) {
-				Log.d(LOG_TAG, "Buffer ended up empty");
+				Log.e(LOG_TAG, "Buffer ended up empty");
 				return null;
 			}
 
 			currencyJsonStr = buffer.toString();
 		}
 		catch (IOException e) {
-			publishProgress("Unable to get currencies list due to connectivity problems");
+			publishProgress(mContext.getString(R.string.error_toast_http_fetch_currencies));
 			return null;
 		} finally {
 			if (urlConnection != null) {
@@ -132,6 +131,7 @@ public class FetchCurrenciesTask  extends AsyncTask<Void, String, Void> {
 					reader.close();
 				} catch (final IOException e) {
 					Log.e(LOG_TAG, "Error closing stream", e);
+					e.printStackTrace();
 				}
 			}
 		}

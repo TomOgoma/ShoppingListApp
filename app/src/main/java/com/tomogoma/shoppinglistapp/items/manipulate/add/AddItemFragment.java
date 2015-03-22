@@ -3,6 +3,7 @@ package com.tomogoma.shoppinglistapp.items.manipulate.add;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.DBUpdateHelper;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.Item;
@@ -36,7 +37,8 @@ public class AddItemFragment extends ManipulateItemFragment {
 		long categoryID = DBUpdateHelper.addCategory(getActivity(), categoryName);
 
 		if (itemName.isEmpty()) {
-			UI.showToast(getActivity(), "Category: " + categoryName + " is now in place");
+			String message = getString(R.string.toast_category_created);
+			UI.showKeyboardToast(getActivity(), String.format(message, categoryName));
 			return packageResultIntent(categoryID, categoryName);
 		}
 
@@ -48,19 +50,19 @@ public class AddItemFragment extends ManipulateItemFragment {
 
 		if (itemID == -1) {
 			//  TODO edit the item?
-			UI.showToast(getActivity(), itemName + " already exists");
+			String message = getString(R.string.error_toast_item_exists);
+			UI.showKeyboardToast(getActivity(), String.format(message, itemName));
 			return null;
 		}
 
-		String toastMessage =  itemName + " successfully created";
-
+		String butPlaced = "";
 		if (categoryName.isEmpty()) {
 			categoryName = CategoryEntry.DEFAULT_NAME;
-			toastMessage += " but placed";
+			butPlaced = getString(R.string.toast_but_placed);
 		}
 
-		toastMessage += " in the " + categoryName + " category";
-		UI.showToast(getActivity(), toastMessage);
+		String toastMessage =  String.format(getString(R.string.toast_item_created), itemName, butPlaced, categoryName);
+		UI.showKeyboardToast(getActivity(), toastMessage);
 		return packageResultIntent(categoryID, categoryName);
 	}
 

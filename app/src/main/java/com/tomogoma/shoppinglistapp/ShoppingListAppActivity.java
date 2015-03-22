@@ -1,6 +1,5 @@
 package com.tomogoma.shoppinglistapp;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,7 +17,7 @@ import com.tomogoma.shoppinglistapp.util.UI;
  */
 public abstract class ShoppingListAppActivity extends ActionBarActivity {
 
-	private  Class<Activity> mParentActivity;
+	private  Class<?> mParentActivity;
 
 	/**
 	 * Expects the parent Activity Class of implementing instance for use in the "Up"
@@ -46,7 +45,7 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		onSuperCreate(savedInstanceState);
 
-		mParentActivity = (Class<Activity>) getParentActivity();
+		mParentActivity = getParentActivity();
 		if (mParentActivity == null) {
 			getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 		} else {

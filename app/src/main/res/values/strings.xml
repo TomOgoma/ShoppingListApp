@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 	<!--Application Strings-->
 	<string name="app_name">Shopping List App</string>
 
@@ -11,10 +11,6 @@
 	<string name="action_settings">Settings</string>
 	<string name="action_add">Add</string>
 	<string name="action_done">Done</string>
-
-	<!--Toasts-->
-	<string name="missing_item_error_view">Probably forgot the item\'s name?</string>
-	<string name="missing_category_error_view">Nice to have categories, isn\'t it?</string>
 
 	<!--Sync Adapter-->
 	<string name="sync_account_type">shoppinglistapp.tomogoma.com</string>
@@ -49,4 +45,37 @@
 	<string name="lasts_week_text">Weeks</string>
 	<string name="lasts_month_text">Months</string>
 	<string name="lasts_year_text">Years</string>
+
+	<!--Input View error messages-->
+	<string name="error_inputViewErr_missing_item">Probably forgot the item\'s name?</string>
+	<string name="error_inputViewErr_missing_category">Nice to have categories, isn\'t it?</string>
+
+	<!--Error Toast Messages-->
+	<string name="error_toast_http_fetch_currencies">Unable to get currencies list due to connectivity problems</string>
+	<string name="error_toast_fetch_currencies">Unable to get currencies list due to unexpected problems</string>
+	<string name="error_toast_fetch_preferred_currency_too_late">Failed to load preferred currency, falling back to default;
+		reloading the screen may help</string>
+	<string name="error_toast_loading_data">An error occurred loading data, please try again</string>
+	<string name="error_toast_db_delete_fail">failed to delete the item, please try again</string>
+	<string name="error_toast_db_update_fail">failed to update the item: <xliff:g id="itemName">%s</xliff:g>, please try again</string>
+	<string name="error_toast_missing_item_name">Missing the item name</string>
+	<string name="error_toast_missing_item_or_category">Missing the item name or category name; must enter at least one</string>
+	<string name="error_toast_db_potential_data_corruption">Whoa! I may have screwed up, please check that your data is okay</string>
+	<string name="error_toast_item_exists"><xliff:g id="itemName">%s</xliff:g> already exists</string>
+
+	<!--Informative Toast Messages-->
+	<string name="toast_successful_delete">Successfully deleted <xliff:g id="itemName">%s</xliff:g></string>
+	<string name="toast_category_created">Category:  <xliff:g id="categoryName">%s</xliff:g>  is now in place</string>
+	<!--toast_item_created/toast_item_updated and toast_but_placed go together; but placed can be an empty string though-->
+	<string name="toast_item_created">
+		<xliff:g id="itemName">%s</xliff:g> successfully created
+		<xliff:g id="butPlaced">%s</xliff:g> in the
+		<xliff:g id="categoryName">%s</xliff:g> category
+	</string>
+	<string name="toast_item_updated">
+		<xliff:g id="itemName">%s</xliff:g> successfully updated
+		<xliff:g id="butPlaced">%s</xliff:g> in the
+		<xliff:g id="categoryName">%s</xliff:g> category
+	</string>
+	<string name="toast_but_placed"> but placed</string>
 </resources>

@@ -2,15 +2,19 @@
 	<string name="title_activity_settings">Settings</string>
 
 	<!-- General -->
-	<string name="pref_header_general">General</string>
 
+	<!--Header-->
+	<string name="pref_header_general">General</string>
+	<!--Currency-->
 	<string name="pref_key_currency">currency</string>
 	<string name="pref_title_currency">Currency</string>
 	<string name="pref_default_currency">KES</string>
 
 	<!-- Data & Sync -->
-	<string name="pref_header_data_sync">Data &amp; sync</string>
 
+	<!--Header-->
+	<string name="pref_header_data_sync">Data &amp; sync</string>
+	<!--Sync Frequency-->
 	<string name="pref_key_sync_frequency">sync_frequency</string>
 	<string name="pref_title_sync_frequency">Sync frequency</string>
 	<string name="pref_min_sync_frequency">15</string>
@@ -34,15 +38,17 @@
 	</string-array>
 
 	<!-- Notifications -->
+
+	<!--Header-->
 	<string name="pref_header_notifications">Notifications</string>
-
-	<string name="pref_key_new_message_notifications">new_message_notifications</string>
-	<string name="pref_title_new_message_notifications">New message notifications</string>
-
+	<!--Notification-->
+	<string name="pref_key_new_message_notifications">notifications</string>
+	<string name="pref_title_new_message_notifications">Notifications</string>
+	<!--Ringtone-->
 	<string name="pref_key_ringtone">ringtone</string>
 	<string name="pref_title_ringtone">Ringtone</string>
 	<string name="pref_ringtone_silent">Sound</string>
-
+	<!--Vibrate-->
 	<string name="pref_key_vibrate">vibrate</string>
 	<string name="pref_title_vibrate">Vibrate</string>
 </resources>

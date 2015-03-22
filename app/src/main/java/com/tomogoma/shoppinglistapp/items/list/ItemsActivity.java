@@ -2,7 +2,6 @@ package com.tomogoma.shoppinglistapp.items.list;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -29,13 +28,11 @@ public abstract class ItemsActivity extends ShoppingListAppActivity {
 	protected void onSuperCreate(Bundle savedInstanceState) {
 
 		Bundle arguments = getIntent().getBundleExtra(EXTRA_Bundle_CATEGORY_DETAILS);
-		Log.d(getClass().getSimpleName(), "Arguments is empty? " + (arguments == null));
 		if (arguments != null) {
 			mCategoryID = arguments.getLong(ItemsFragment.EXTRA_long_CATEGORY_ID,
 			                                CategoryEntry.DEFAULT_ID);
 			mCategoryName = arguments.getString(ItemsFragment.EXTRA_String_CATEGORY_NAME,
 			                                    CategoryEntry.DEFAULT_NAME);
-			Log.d(getClass().getSimpleName(), "Got category name: " + mCategoryName);
 		}
 	}
 

@@ -17,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.Currency;
@@ -24,6 +25,7 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.sync.SyncAdapter;
 import com.tomogoma.shoppinglistapp.util.Formatter;
 import com.tomogoma.shoppinglistapp.util.Preference;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 /**
  * Created by Tom Ogoma on 20/03/15.
@@ -31,8 +33,11 @@ import com.tomogoma.shoppinglistapp.util.Preference;
 public class PreferencesFragment extends PreferenceFragment
 		implements LoaderCallbacks<Cursor> {
 
+	private static final String LOG_TAG = PreferencesFragment.class.getSimpleName();
 	private static final int CURRENCY_LOADER_ID = 90;
+
 	private static  boolean sIsBindingPreference;
+
 	private ListPreference mCurrencyPreference;
 	private Cursor mCurrencyCursor;
 
@@ -141,20 +146,24 @@ public class PreferencesFragment extends PreferenceFragment
 				String symbol = mCurrencyCursor.getString(mCurrencyCursor.getColumnIndex(CurrencyEntry.COLUMN_SYMBOL));
 				String country = mCurrencyCursor.getString(mCurrencyCursor.getColumnIndex(CurrencyEntry.COLUMN_COUNTRY));
 
-				String entry = Formatter.formatLongCurrency(new Currency(code, symbol, name));
-
+				Currency currency = new Currency(code, symbol, name, country);
+				String entry = null;
 				hasNext = mCurrencyCursor.moveToNext();
 
 				if (hasNext) {
 
 					nextName = mCurrencyCursor.getString(mCurrencyCursor.getColumnIndex(CurrencyEntry.COLUMN_NAME));
 					if (nextName.equals(name)) {
-						entry += " - " + country;
+						entry  = Formatter.formatLongCurrency(currency, true);
 					}
 				}
 
 				if (name.equals(previousName) && !nextName.equals(name)) {
-					entry += " - " + country;
+					entry  = Formatter.formatLongCurrency(currency, true);
+				}
+
+				if (entry == null) {
+					entry   = Formatter.formatLongCurrency(currency, false);
 				}
 
 				entries[counter] = entry;
@@ -167,6 +176,12 @@ public class PreferencesFragment extends PreferenceFragment
 
 		} else {
 			//  TODO handle this error
+			Log.e(LOG_TAG, "Cursor returned no rows; not even the default row; count: " + mCurrencyCursor.getCount());
+			entries = new String[1];
+			entryValues = new String[1];
+			entries[0] = CurrencyEntry.DEFAULT_NAME;
+			entryValues[0] = String.valueOf(CurrencyEntry.DEFAULT_ID);
+			UI.showToast(getActivity(), getString(R.string.error_toast_fetch_currencies));
 		}
 
 		mCurrencyPreference.setEntries(entries);

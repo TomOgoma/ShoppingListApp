@@ -11,34 +11,57 @@ public class Currency {
 	private String mName;
 	private String mCountry;
 
-	public Currency(String code, String symbol, double lastConversion) {
-		mCode = code;
-		mSymbol = symbol;
-		mLastConversion = lastConversion;
+	/**
+	 * Constructor
+	 * Initializes the latest conversion to 1d
+	 * See {@link #Currency(String, String, String, String, double)}
+	 */
+	public Currency(String code, String symbol, String name, String country) {
+		this(code, symbol, name, country, 1d);
 	}
 
-	public Currency(String code, String symbol, String name) {
-		mCode = code;
-		mSymbol = symbol;
-		mLastConversion = 1d;
-		mName = name;
-	}
-
-	public Currency(String code, String symbol, String name, double lastConversion) {
-		mCode = code;
-		mSymbol = symbol;
-		mLastConversion = lastConversion;
-		mName = name;
-	}
-
+	/**
+	 * Constructor
+	 * </p>
+	 * Note that:
+	 * </p>
+	 * code cannot be null or empty
+	 * </p>
+	 * symbol cannot be null but an empty String is allowed
+	 * </p>
+	 * lastConversion cannot be <= 0
+	 * </p>
+	 * If country/name are null by the time their getters are called, an
+	 * {@link java.lang.UnsupportedOperationException} will be thrown
+	 * </p>
+	 * @param code currency code (cannot be null/empty)
+	 * @param symbol currency symbol (cannot be null but can be empty)
+	 * @param name currency name
+	 * @param country country name
+	 * @param lastConversion the latest conversion rate KES->{code}
+	 */
 	public Currency(String code, String symbol, String name, String country, double lastConversion) {
+
+		if (code==null||code.isEmpty()) {
+			throw new IllegalArgumentException("code cannot be null/empty");
+		}
+		if (symbol==null) {
+			throw new IllegalArgumentException("symbol cannot be empty");
+		}
+		if (lastConversion <= 0d) {
+			throw new IllegalArgumentException("last conversion cannot be less than 1d");
+		}
 		mCode = code;
 		mSymbol = symbol;
-		mLastConversion = lastConversion;
 		mName = name;
 		mCountry = country;
+		mLastConversion = lastConversion;
 	}
 
+	/**
+	 *
+	 * @return currency code (never null/empty)
+	 */
 	public String getCode() {
 		return mCode;
 	}
@@ -47,6 +70,10 @@ public class Currency {
 		this.mCode = mCode;
 	}
 
+	/**
+	 *
+	 * @return currency symbol (never null but can be empty)
+	 */
 	public String getSymbol() {
 		return mSymbol;
 	}
@@ -55,6 +82,10 @@ public class Currency {
 		this.mSymbol = mSymbol;
 	}
 
+	/**
+	 *
+	 * @return latest conversion rate from KES cannot be <= 0d
+	 */
 	public double getLastConversion() {
 		return mLastConversion;
 	}
@@ -63,7 +94,15 @@ public class Currency {
 		this.mLastConversion = mLastConversion;
 	}
 
+	/**
+	 *
+	 * @return currency name
+	 * @throws java.lang.UnsupportedOperationException if currency name is null/empty
+	 */
 	public String getName() {
+		if (mName==null||mName.isEmpty()) {
+			throw new UnsupportedOperationException("This currency does not have a name");
+		}
 		return mName;
 	}
 
@@ -71,7 +110,15 @@ public class Currency {
 		this.mName = mName;
 	}
 
+	/**
+	 *
+	 * @return the country name
+	 * @throws java.lang.UnsupportedOperationException when country name is null/empty
+	 */
 	public String getCountry() {
+		if (mCountry==null||mCountry.isEmpty()) {
+			throw new UnsupportedOperationException("this currency does not have a country");
+		}
 		return mCountry;
 	}
 

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -138,11 +139,12 @@ public class ItemsFragment extends Fragment
 		int count = contentResolver.delete(ItemEntry.CONTENT_URI, whereClause, whereArgs);
 		//  TODO do not delete immediately, archive and allow undo
 		if (count==0) {
-			UI.showToast(getActivity(), "failed to delete the item, please try again");
+			UI.showToast(getActivity(), getString(R.string.error_toast_db_delete_fail));
 		} else if (count>1) {
-			UI.showToast(getActivity(), "Whoaaa! I may have screwed up, please check that your data is okay");
+			UI.showToast(getActivity(), getString(R.string.error_toast_db_potential_data_corruption));
 		} else {
-			UI.showToast(getActivity(), "Successfully deleted " + itemName);
+			String successfulMessage = getString(R.string.toast_successful_delete);
+			UI.showToast(getActivity(), String.format(successfulMessage, itemName));
 		}
 	}
 
@@ -159,10 +161,16 @@ public class ItemsFragment extends Fragment
 				String code = cursor.getString(cursor.getColumnIndex(CurrencyEntry.COLUMN_CODE));
 				String symbol = cursor.getString(cursor.getColumnIndex(CurrencyEntry.COLUMN_SYMBOL));
 				lastConversion = (lastConversion<=0)? 1d: lastConversion;
-				currency = new Currency(code, symbol, lastConversion);
+				currency = new Currency(code, symbol, null, null, lastConversion);
 			}
 			else {
-				currency = new Currency(CurrencyEntry.DEFAULT_CODE, CurrencyEntry.DEFAULT_SYMBOL, 1d);
+				Log.e(LOG_TAG, "No currencies found, not even default; count=" + cursor.getCount());
+				currency = new Currency(
+						CurrencyEntry.DEFAULT_CODE,
+						CurrencyEntry.DEFAULT_SYMBOL,
+						CurrencyEntry.DEFAULT_NAME,
+						CurrencyEntry.DEFAULT_COUNTRY
+					);
 			}
 			itemsAdapter.setCurrency(currency);
 		}

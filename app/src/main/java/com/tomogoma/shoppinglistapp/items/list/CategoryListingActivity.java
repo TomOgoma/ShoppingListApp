@@ -11,7 +11,7 @@ import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity;
 
 public class CategoryListingActivity extends ItemsActivity implements OnCategorySelectedListener {
 
-	private static final String SAVED_IS_CATEGORY_SELECTED = "saved.is.category.selected";
+	private static final String SAVED_STATE_IS_CATEGORY_SELECTED = "saved.is.category.selected";
 
 	private boolean mIsTwoPane = false;
 	private boolean mIsCategorySelected = false;
@@ -44,14 +44,14 @@ public class CategoryListingActivity extends ItemsActivity implements OnCategory
 			}
 		}
 		else {
-			mIsCategorySelected = savedInstanceState.getBoolean(SAVED_IS_CATEGORY_SELECTED, false);
+			mIsCategorySelected = savedInstanceState.getBoolean(SAVED_STATE_IS_CATEGORY_SELECTED, false);
 		}
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 
-		outState.putBoolean(SAVED_IS_CATEGORY_SELECTED, mIsCategorySelected);
+		outState.putBoolean(SAVED_STATE_IS_CATEGORY_SELECTED, mIsCategorySelected);
 		super.onSaveInstanceState(outState);
 	}
 

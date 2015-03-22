@@ -22,10 +22,17 @@ public class UI {
 		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 	}
 
-	public static void showToast(Context context, String message) {
+	public static void showKeyboardToast(Context context, String message) {
 
 		Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
 		toast.setGravity(Gravity.CENTER, 0, 0);
 		toast.show();
+	}
+
+	public static void showToast(Context context, String message) {
+
+		Toast
+				.makeText(context, message, Toast.LENGTH_LONG)
+				.show();
 	}
 }

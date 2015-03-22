@@ -31,11 +31,11 @@ import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemFragment;
 import com.tomogoma.shoppinglistapp.util.Formatter;
 import com.tomogoma.shoppinglistapp.util.UI;
 
-public abstract class ManipulateItemFragment
-		extends Fragment
-		implements OnFocusChangeListener, OnEditorActionListener,  OnImeBackListener, OnCheckedChangeListener {
+public abstract class ManipulateItemFragment extends Fragment
+		implements OnFocusChangeListener, OnEditorActionListener,
+		           OnImeBackListener, OnCheckedChangeListener {
 
-	public static final String EXTRA_String_CATEGORY_NAME = AddItemFragment.class.getName() + "_extra.category.id";
+	public static final String EXTRA_String_CATEGORY_NAME = ManipulateItemFragment.class.getName() + "_extra.category.id";
 
 	protected EditText etVersion;
 	protected EditText etUnitPrice;
@@ -221,11 +221,11 @@ public abstract class ManipulateItemFragment
 
 		if (categoryName.isEmpty() && itemName.isEmpty()) {
 
-			autoTvItemName.setError(getString(R.string.missing_item_error_view));
-			autoTvCategoryName.setError(getString(R.string.missing_category_error_view));
+			autoTvItemName.setError(getString(R.string.error_inputViewErr_missing_item));
+			autoTvCategoryName.setError(getString(R.string.error_inputViewErr_missing_category));
 
-			String errorMessage = "Missing the item name or category name; must enter at least one";
-			UI.showToast(getActivity(), errorMessage);
+			String errorMessage = getString(R.string.error_toast_missing_item_or_category);
+			UI.showKeyboardToast(getActivity(), errorMessage);
 
 			return false;
 		}
