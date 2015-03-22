@@ -99,7 +99,7 @@
 
 	<include
 		android:id="@+id/quantityLayout"
-		layout="@layout/expanded_quantity_layout"
+		layout="@layout/quantity_layout_expanded"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:minHeight="@dimen/text_view_height"

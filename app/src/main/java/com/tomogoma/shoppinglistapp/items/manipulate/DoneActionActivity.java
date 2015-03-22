@@ -13,7 +13,7 @@ public abstract class DoneActionActivity extends ShoppingListAppActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		getMenuInflater().inflate(R.menu.add_item, menu);
+		getMenuInflater().inflate(R.menu.done_action, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
