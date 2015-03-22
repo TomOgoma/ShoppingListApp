@@ -179,6 +179,7 @@ public class ShoppingListProvider extends ContentProvider {
 			case CURRENCY: {
 				try {
 					returnUri = insertCurrency(db, values);
+					getContext().getContentResolver().notifyChange(DatabaseContract.BASE_CONTENT_URI, null);
 				} catch (SQLException e) {
 					throw new SQLException(e.getMessage() + uri);
 				}
@@ -222,7 +223,7 @@ public class ShoppingListProvider extends ContentProvider {
 					db.endTransaction();
 				}
 
-				getContext().getContentResolver().notifyChange(uri, null);
+				getContext().getContentResolver().notifyChange(DatabaseContract.BASE_CONTENT_URI, null);
 				return returnCount;
 			}
 			default:
@@ -247,6 +248,7 @@ public class ShoppingListProvider extends ContentProvider {
 				break;
 			case CURRENCY:
 				rowsDeleted = db.delete(CurrencyEntry.TABLE_NAME, selection, selectionArgs);
+				getContext().getContentResolver().notifyChange(DatabaseContract.BASE_CONTENT_URI, null);
 				break;
 			default:
 				throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -277,6 +279,7 @@ public class ShoppingListProvider extends ContentProvider {
 				break;
 			case CURRENCY:
 				rowsUpdated = db.update(CurrencyEntry.TABLE_NAME, values, selection, selectionArgs);
+				getContext().getContentResolver().notifyChange(DatabaseContract.BASE_CONTENT_URI, null);
 				break;
 			default:
 				throw new UnsupportedOperationException("Unknown uri: " + uri);
