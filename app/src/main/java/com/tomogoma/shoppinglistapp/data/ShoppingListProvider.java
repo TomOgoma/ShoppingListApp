@@ -2,18 +2,18 @@ package com.tomogoma.shoppinglistapp.data;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.preference.PreferenceManager;
+import android.util.Log;
 
-import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
+import com.tomogoma.util.PreferenceUtils;
 
 import java.util.Arrays;
 
@@ -22,6 +22,7 @@ import java.util.Arrays;
  */
 public class ShoppingListProvider extends ContentProvider {
 
+	private static final String LOG_TAG = ShoppingListProvider.class.getSimpleName();
 	private static final UriMatcher sUriMatcher = buildUriMatcher();
 
 	private static final int CATEGORY = 100;
@@ -158,7 +159,7 @@ public class ShoppingListProvider extends ContentProvider {
 
 			case ITEM: {
 
-				addCurrency(values);
+				addCurrencyIDToItemValues(values);
 				long _id = db.insert(ItemEntry.TABLE_NAME, null, values);
 				if (_id > 0)
 					returnUri = ItemEntry.buildItemUri(_id);
@@ -176,12 +177,11 @@ public class ShoppingListProvider extends ContentProvider {
 				break;
 			}
 			case CURRENCY: {
-
-				long _id = db.insert(CurrencyEntry.TABLE_NAME, null, values);
-				if (_id > 0)
-					returnUri = CurrencyEntry.buildCurrencyUri(_id);
-				else
-					throw new android.database.SQLException("Failed to insert row into " + uri);
+				try {
+					returnUri = insertCurrency(db, values);
+				} catch (SQLException e) {
+					throw new SQLException(e.getMessage() + uri);
+				}
 				break;
 			}
 			default:
@@ -199,48 +199,6 @@ public class ShoppingListProvider extends ContentProvider {
 		final int match = sUriMatcher.match(uri);
 
 		switch (match) {
-
-			case ITEM: {
-
-				db.beginTransaction();
-				int returnCount = 0;
-
-				try {
-					for (ContentValues value : values) {
-						addCurrency(value);
-						long _id = db.insert(ItemEntry.TABLE_NAME, null, value);
-						if (_id != -1) {
-							returnCount++;
-						}
-					}
-					db.setTransactionSuccessful();
-				} finally {
-					db.endTransaction();
-				}
-
-				getContext().getContentResolver().notifyChange(uri, null);
-				return returnCount;
-			}
-			case CATEGORY: {
-
-				db.beginTransaction();
-				int returnCount = 0;
-
-				try {
-					for (ContentValues value : values) {
-						long _id = db.insert(CategoryEntry.TABLE_NAME, null, value);
-						if (_id != -1) {
-							returnCount++;
-						}
-					}
-					db.setTransactionSuccessful();
-				} finally {
-					db.endTransaction();
-				}
-
-				getContext().getContentResolver().notifyChange(uri, null);
-				return returnCount;
-			}
 			case CURRENCY: {
 
 				db.beginTransaction();
@@ -248,9 +206,15 @@ public class ShoppingListProvider extends ContentProvider {
 
 				try {
 					for (ContentValues value : values) {
-						long _id = db.insert(CurrencyEntry.TABLE_NAME, null, value);
-						if (_id != -1) {
-							returnCount++;
+
+						try {
+							Uri insertUri = insertCurrency(db, value);
+							long insertID = Long.parseLong(CurrencyEntry.getCurrencyIDFromUri(insertUri));
+							if (insertID > 0) {
+								returnCount ++;
+							}
+						} catch(SQLException e) {
+							Log.e(LOG_TAG, e.getMessage());
 						}
 					}
 					db.setTransactionSuccessful();
@@ -305,7 +269,7 @@ public class ShoppingListProvider extends ContentProvider {
 		switch (match) {
 
 			case ITEM:
-				addCurrency(values);
+				addCurrencyIDToItemValues(values);
 				rowsUpdated = db.update(ItemEntry.TABLE_NAME, values, selection, selectionArgs);
 				break;
 			case CATEGORY:
@@ -328,12 +292,15 @@ public class ShoppingListProvider extends ContentProvider {
 	private Cursor getItems(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
 		SQLiteQueryBuilder queryBuilder;
+
 		if (ItemEntry.isToInnerJoinCurrency(uri)) {
 			queryBuilder =sITEM_CURRENCY_TABLES;
 		} else {
 			queryBuilder = new SQLiteQueryBuilder();
 			queryBuilder.setTables(ItemEntry.TABLE_NAME);
 		}
+
+		queryBuilder.setDistinct(ItemEntry.isToSelectDistinct(uri));
 
 		String categoryID = ItemEntry.getCategoryIDFromUri(uri);
 		if (categoryID == null || categoryID.isEmpty()) {
@@ -379,18 +346,52 @@ public class ShoppingListProvider extends ContentProvider {
 			);
 	}
 
-	private void addCurrency(ContentValues values) {
+	private void addCurrencyIDToItemValues(ContentValues values) {
 
 		if (!values.containsKey(ItemEntry.COLUMN_CURRENCY_KEY)) {
-
-			SharedPreferences preferences =
-					PreferenceManager.getDefaultSharedPreferences(getContext());
-			String currencyID = preferences.getString(
-					getContext().getString(R.string.pref_key_currency),
-			         String.valueOf(CurrencyEntry.DEFAULT_ID)
-				);
-			values.put(ItemEntry.COLUMN_CURRENCY_KEY, Long.parseLong(currencyID));
+			long preferredCurrencyID = PreferenceUtils.getPreferredCurrencyID(getContext());
+			values.put(ItemEntry.COLUMN_CURRENCY_KEY, preferredCurrencyID);
 		}
+	}
+
+	private Uri insertCurrency(SQLiteDatabase db, ContentValues values) {
+
+		long _id;
+		Cursor cursor = null;
+
+		try {
+
+			cursor = db.query(
+					CurrencyEntry.TABLE_NAME,
+					new String[]{CurrencyEntry._ID},
+					CurrencyEntry.COLUMN_COUNTRY + " =? ",
+					new String[]{values.getAsString(CurrencyEntry.COLUMN_COUNTRY)},
+					null,
+					null,
+					null
+			);
+
+			if (cursor.moveToFirst()) {
+
+				int columnIndex = cursor.getColumnIndex(CurrencyEntry._ID);
+				_id = cursor.getLong(columnIndex);
+				int count = db.update(CurrencyEntry.TABLE_NAME, values, CurrencyEntry._ID + " =?",
+				                      new String[]{String.valueOf(_id)});
+				if (count != 1) {
+					throw new SQLException("Updated the wrong row(s): count = " + count);
+				}
+			} else {
+				_id = db.insert(CurrencyEntry.TABLE_NAME, null, values);
+			}
+		} finally {
+			if (cursor!=null)
+				cursor.close();
+		}
+
+		if (_id > 0)
+			return CurrencyEntry.buildCurrencyUri(_id);
+		else
+			throw new SQLException("Failed to insert row into ");
 	}
 
 	private Cursor getItemsInCategory(SQLiteQueryBuilder queryBuilder, String[] projection,String selection, String[] selectionArgs,

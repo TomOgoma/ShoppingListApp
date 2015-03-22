@@ -13,21 +13,24 @@
 
 	<string name="pref_key_sync_frequency">sync_frequency</string>
 	<string name="pref_title_sync_frequency">Sync frequency</string>
+	<string name="pref_min_sync_frequency">15</string>
+	<string name="pref_default_sync_frequency">720</string>
+	<string name="pref_max_sync_frequency">10080</string>
 	<string-array name="pref_sync_frequency_titles">
 		<item>15 minutes</item>
 		<item>30 minutes</item>
-		<item>1 hour</item>
-		<item>3 hours</item>
-		<item>6 hours</item>
-		<item>Never</item>
+		<item>hourly</item>
+		<item>12 hours</item>
+		<item>daily</item>
+		<item>weekly</item>
 	</string-array>
 	<string-array name="pref_sync_frequency_values">
-		<item>15</item>
+		<item>@string/pref_min_sync_frequency</item>
 		<item>30</item>
 		<item>60</item>
-		<item>180</item>
-		<item>360</item>
-		<item>-1</item>
+		<item>@string/pref_default_sync_frequency</item>
+		<item>1440</item>
+		<item>@string/pref_max_sync_frequency</item>
 	</string-array>
 
 	<!-- Notifications -->

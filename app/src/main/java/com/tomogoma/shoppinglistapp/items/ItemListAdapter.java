@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.widget.CursorAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,7 +37,7 @@ public class ItemListAdapter extends CursorAdapter {
 			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_LASTS_FOR,
 			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_LASTS_FOR_UNIT,
 			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_IN_LIST,
-			CurrencyEntry.TABLE_NAME + "." + CurrencyEntry._ID,
+			CurrencyEntry.TABLE_NAME + "." + CurrencyEntry.COLUMN_CODE,
 			CurrencyEntry.TABLE_NAME + "." + CurrencyEntry.COLUMN_LAST_CONVERSION
 	};
 	private static final int ITEM_ID_COL_INDEX = 0;
@@ -50,9 +49,10 @@ public class ItemListAdapter extends CursorAdapter {
 	private static final int ITEM_LASTS_FOR_UNIT_COL_INDEX = 6;
 	private static final int ITEM_LASTS_FOR_COL_INDEX = 7;
 	private static final int ITEM_IN_LIST_COL_INDEX = 8;
-	private static final int CURRENCY_ID_COL_INDEX = 9;
+	private static final int CURRENCY_CODE_COL_INDEX = 9;
 	private static final int CURRENCY_LATEST_CONVERSION_COL_INDEX = 10;
 
+	private static final String LOG_TAG = ItemListAdapter.class.getSimpleName();
 	private static final int SELECTED_VIEW_TYPE = 0;
 	private static final int NORMAL_VIEW_TYPE = 1;
 
@@ -95,7 +95,6 @@ public class ItemListAdapter extends CursorAdapter {
 	}
 
 	public void setCurrency(Currency currency) {
-		Log.d(getClass().getSimpleName(), "Loading preferred currency...");
 		mCurrency = currency;
 	}
 
@@ -115,16 +114,13 @@ public class ItemListAdapter extends CursorAdapter {
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
-		Log.d(getClass().getSimpleName(), "Creating new view...");
 		View view;
 		switch(getItemViewType(cursor.getPosition())) {
 			case SELECTED_VIEW_TYPE:
-				Log.d(getClass().getSimpleName(), "New view is a selected type");
 				view = LayoutInflater.from(context).inflate(R.layout.list_item_expanded, parent, false);
 				break;
 			case NORMAL_VIEW_TYPE:
 			default:
-				Log.d(getClass().getSimpleName(), "New view is a normal type");
 				view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
 				ViewHolder viewHolder = new ViewHolder(view);
 				view.setTag(viewHolder);
@@ -135,20 +131,15 @@ public class ItemListAdapter extends CursorAdapter {
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
 
-		Log.d(getClass().getSimpleName(), "Binding data to view...");
 		if (getItemViewType(cursor.getPosition()) == SELECTED_VIEW_TYPE) {
-			Log.d(getClass().getSimpleName(), "View is a selected view");
 			bindExpandedView(view, context, cursor);
-			Log.d(getClass().getSimpleName(), "Done, final position set to " + mSelectedPosition);
 			return;
 		}
 
 		if (mCurrency == null) {
-			Log.d(getClass().getSimpleName(), "Loading default currency...");
 			mCurrency = getDefaultCurrency(mContext);
 		}
 
-		Log.d(getClass().getSimpleName(), "View is a normal view");
 		ViewHolder viewHolder = (ViewHolder) view.getTag();
 
 		long itemID = cursor.getLong(ITEM_ID_COL_INDEX);
@@ -158,19 +149,18 @@ public class ItemListAdapter extends CursorAdapter {
 		String name = cursor.getString(ITEM_NAME_COL_INDEX);
 		String measUnit = cursor.getString(ITEM_MEAS_UNIT_COL_INDEX);
 
-		String saveTimeCode = cursor.getString(CURRENCY_ID_COL_INDEX);
-		double saveTimeConversion = cursor.getDouble(CURRENCY_LATEST_CONVERSION_COL_INDEX);
-		saveTimeConversion = (saveTimeConversion <= 0)? 1: saveTimeConversion;
+		String boundCurrencyCode = cursor.getString(CURRENCY_CODE_COL_INDEX);
+		double boundCurrencyConversion = cursor.getDouble(CURRENCY_LATEST_CONVERSION_COL_INDEX);
+		boundCurrencyConversion = (boundCurrencyConversion <= 0)? 1: boundCurrencyConversion;
 
 		viewHolder.title.setText(name);
 		setQuantity(viewHolder.quantity, viewHolder.measUnit, measUnit, quantity);
-		setPrice(viewHolder.unitPrice, viewHolder.totalPrice, price, quantity, saveTimeCode, saveTimeConversion);
+		setPrice(viewHolder.unitPrice, viewHolder.totalPrice, price, quantity, boundCurrencyCode, boundCurrencyConversion);
 		setInList(viewHolder.isInList, itemID, inList);
 	}
 
 	private void bindExpandedView(View view, final Context context, Cursor cursor) {
 
-		Log.d(getClass().getSimpleName(), "Binding expanded view...");
 		TextView title = (TextView) view.findViewById(R.id.title);
 		ImageView imgEditItem = (ImageView) view.findViewById(R.id.editItem);
 		ImageView imgDeleteItem = (ImageView) view.findViewById(R.id.deleteItem);
@@ -196,7 +186,7 @@ public class ItemListAdapter extends CursorAdapter {
 		String unit = cursor.getString(ITEM_MEAS_UNIT_COL_INDEX);
 		String lastsUnit = cursor.getString(ITEM_LASTS_FOR_UNIT_COL_INDEX);
 
-		String saveTimeCode = cursor.getString(CURRENCY_ID_COL_INDEX);
+		String saveTimeCode = cursor.getString(CURRENCY_CODE_COL_INDEX);
 		double saveTimeConversion = cursor.getDouble(CURRENCY_LATEST_CONVERSION_COL_INDEX);
 		saveTimeConversion = (saveTimeConversion <= 0)? 1: saveTimeConversion;
 
@@ -258,7 +248,8 @@ public class ItemListAdapter extends CursorAdapter {
 		view.setText(quantityStr);
 	}
 
-	private void setPrice(TextView tvPrice, TextView tvTotalPrice, double price, float quantity, String storedCode, double storedConversion) {
+	private void setPrice(TextView tvPrice, TextView tvTotalPrice, double price,
+	                      float quantity, String boundCurrencyCode, double boundCurrencyConversion) {
 
 		//  if no price to show, hide the price view
 		if (price == 0d) {
@@ -273,8 +264,8 @@ public class ItemListAdapter extends CursorAdapter {
 
 		//  assume total price is for one item if quantity not set
 		quantity = (quantity == 0f)? 1f: quantity;
-		String unitPriceStr = Formatter.formatUnitPrice(price, storedCode, storedConversion, mCurrency);
-		String totalPriceStr = Formatter.formatPrice(price, quantity, storedCode, storedConversion, mCurrency);
+		String unitPriceStr = Formatter.formatUnitPrice(price, boundCurrencyCode, boundCurrencyConversion, mCurrency);
+		String totalPriceStr = Formatter.formatPrice(price, quantity, boundCurrencyCode, boundCurrencyConversion, mCurrency);
 
 		tvPrice.setText(unitPriceStr);
 		tvTotalPrice.setText(totalPriceStr);

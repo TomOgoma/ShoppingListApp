@@ -14,7 +14,7 @@ import static com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
  */
 public class DBHelper extends SQLiteOpenHelper {
 
-	private static final int DATABASE_VERSION = 6;
+	private static final int DATABASE_VERSION = 9;
 	private static final String DATABASE_NAME = "shoppingList.db";
 
 	public DBHelper(Context context) {
@@ -40,15 +40,16 @@ public class DBHelper extends SQLiteOpenHelper {
 				"CREATE TABLE " + CurrencyEntry.TABLE_NAME + " (" +
 
 						CurrencyEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-						CurrencyEntry.COLUMN_CODE + " TEXT NOT NULL," +
-						CurrencyEntry.COLUMN_SYMBOL + " TEXT," +
-						CurrencyEntry.COLUMN_NAME + " TEXT NOT NULL," +
 						CurrencyEntry.COLUMN_COUNTRY + " TEXT NOT NULL," +
+						CurrencyEntry.COLUMN_CODE + " TEXT NOT NULL," +
+						CurrencyEntry.COLUMN_NAME + " TEXT NOT NULL," +
+						CurrencyEntry.COLUMN_SYMBOL + " TEXT," +
 						CurrencyEntry.COLUMN_LAST_CONVERSION + " REAL," +
 
-						"UNIQUE (" + CurrencyEntry.COLUMN_CODE + ") ON CONFLICT REPLACE," +
+						"UNIQUE (" + CurrencyEntry.COLUMN_COUNTRY + ") ON CONFLICT FAIL," +
 						" CHECK(" + CurrencyEntry.COLUMN_CODE + " <> '')," +
-						" CHECK(" + CurrencyEntry.COLUMN_NAME + " <> '')" +
+						" CHECK(" + CurrencyEntry.COLUMN_NAME + " <> '')," +
+						" CHECK(" + CurrencyEntry.COLUMN_COUNTRY + " <> '')" +
 						")";
 
 		//  Duplicates of Item names not allowed (not even when under different categories)
@@ -118,12 +119,9 @@ public class DBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-		if (oldVersion == 5 && newVersion >= 6) {
-
-			db.execSQL("DROP TABLE IF EXISTS " + CategoryEntry.TABLE_NAME);
-			db.execSQL("DROP TABLE IF EXISTS " + ItemEntry.TABLE_NAME);
-			oldVersion++;
-		}
+		db.execSQL("DROP TABLE IF EXISTS " + CategoryEntry.TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + CurrencyEntry.TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + ItemEntry.TABLE_NAME);
 		onCreate(db);
 	}
 }

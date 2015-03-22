@@ -17,6 +17,8 @@ public class DatabaseContract {
 	public static final String PATH_CURRENCY = "currency";
 	public static final String PATH_ITEM = "item";
 
+	public static final String PARAM_DISTINCT = "distinct";
+
 	public static final class CategoryEntry implements BaseColumns {
 
 		public static final Uri CONTENT_URI =
@@ -101,7 +103,14 @@ public class DatabaseContract {
 		public static Uri buildItemsInCategoryUri(long categoryID, boolean leftJoinCurrency) {
 			return CONTENT_URI.buildUpon()
 			                  .appendQueryParameter(PATH_CATEGORY, String.valueOf(categoryID))
-					.appendQueryParameter(PATH_CURRENCY, leftJoinCurrency ? "1" : "0")
+			                  .appendQueryParameter(PATH_CURRENCY, leftJoinCurrency ? "1" : "0")
+			                  .build();
+		}
+
+		public static Uri buildItemsCurrenciesUri() {
+			return CONTENT_URI.buildUpon()
+			                  .appendQueryParameter(PATH_CURRENCY,  "1")
+			                  .appendQueryParameter(PARAM_DISTINCT,  "1")
 			                  .build();
 		}
 
@@ -111,6 +120,13 @@ public class DatabaseContract {
 
 		public static boolean isToInnerJoinCurrency(Uri uri) {
 			String param = uri.getQueryParameter(PATH_CURRENCY);
+			if (param == null)
+				return false;
+			return param.equals("1");
+		}
+
+		public static boolean isToSelectDistinct(Uri uri) {
+			String param = uri.getQueryParameter(PARAM_DISTINCT);
 			if (param == null)
 				return false;
 			return param.equals("1");

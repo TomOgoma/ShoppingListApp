@@ -2,13 +2,10 @@ package com.tomogoma.shoppinglistapp.items.list;
 
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +24,7 @@ import com.tomogoma.shoppinglistapp.items.ItemListAdapter;
 import com.tomogoma.shoppinglistapp.items.ItemListAdapter.OnDeleteItemRequestListener;
 import com.tomogoma.shoppinglistapp.items.ItemListAdapter.OnEditItemRequestListener;
 import com.tomogoma.shoppinglistapp.items.manipulate.edit.EditItemActivity;
+import com.tomogoma.util.PreferenceUtils;
 import com.tomogoma.util.UIUtils;
 
 /**
@@ -37,6 +35,8 @@ public class ItemsFragment extends Fragment
 
 	public static final String EXTRA_long_CATEGORY_ID = ItemsFragment.class.getName() + "_extra.category.id";
 	public static final String EXTRA_String_CATEGORY_NAME = ItemsFragment.class.getName() + "_extra.category.name";
+
+	private static final String LOG_TAG = ItemsFragment.class.getSimpleName();
 
 	private ItemListAdapter itemsAdapter;
 	private long mCategoryID;
@@ -84,19 +84,10 @@ public class ItemsFragment extends Fragment
 
 		String itemSortOrder = ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_NAME + " ASC";
 		Uri itemUri = ItemEntry.buildItemsInCategoryUri(mCategoryID, true);
-		Log.d(getClass().getName(), itemUri.getPath());
 		String[] itemProjection = ItemListAdapter.S_ITEMS_PROJECTION;
 
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		String currencyID = prefs.getString(
-				getActivity().getString(R.string.pref_key_currency), String.valueOf(CurrencyEntry.DEFAULT_ID));
-		long currencyIDLong;
-		try {
-			currencyIDLong = Long.parseLong(currencyID);
-		} catch (Exception e) {
-			currencyIDLong = CurrencyEntry.DEFAULT_ID;
-		}
-		Uri currencyUri = CurrencyEntry.buildCurrencyUri(currencyIDLong);
+		long preferredCurrencyID = PreferenceUtils.getPreferredCurrencyID(getActivity());
+		Uri currencyUri = CurrencyEntry.buildCurrencyUri(preferredCurrencyID);
 		String[] currencyProjection = new String[] {
 				CurrencyEntry.COLUMN_SYMBOL,
 				CurrencyEntry.COLUMN_CODE,
@@ -171,7 +162,7 @@ public class ItemsFragment extends Fragment
 				currency = new Currency(code, symbol, lastConversion);
 			}
 			else {
-				currency = new Currency(CurrencyEntry.DEFAULT_CODE, CurrencyEntry.DEFAULT_SYMBOL, 1);
+				currency = new Currency(CurrencyEntry.DEFAULT_CODE, CurrencyEntry.DEFAULT_SYMBOL, 1d);
 			}
 			itemsAdapter.setCurrency(currency);
 		}
