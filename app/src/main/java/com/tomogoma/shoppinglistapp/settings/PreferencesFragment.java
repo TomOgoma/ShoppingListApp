@@ -194,6 +194,7 @@ public class PreferencesFragment extends PreferenceFragment
 		mCurrencyPreference = new ListPreference(getActivity());
 		mCurrencyPreference.setKey(getString(R.string.pref_key_currency));
 		mCurrencyPreference.setTitle(getString(R.string.pref_title_currency));
+		mCurrencyPreference.setDialogTitle(R.string.pref_title_currency);
 		mCurrencyPreference.setNegativeButtonText(null);
 		mCurrencyPreference.setPositiveButtonText(null);
 		mCurrencyPreference.setDefaultValue(String.valueOf(CurrencyEntry.DEFAULT_ID));
