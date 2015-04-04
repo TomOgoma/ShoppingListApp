@@ -53,6 +53,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	@Override
 	public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
 
+		Log.i(LOG_TAG, "onPerformSync called");
+
 		HttpURLConnection urlConnection = null;
 		BufferedReader reader = null;
 		Vector<String> convertedCurrenciesJsonStr = new Vector<>();
@@ -286,7 +288,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			} catch (OperationApplicationException e) {
 				Log.e(LOG_TAG, "OperationApplication Exception caught: " + e.getMessage());
 			}
-			//getContext().getContentResolver().bulkInsert(CurrencyEntry.CONTENT_URI, cpoArray);
 		}
 	}
 

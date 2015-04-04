@@ -22,12 +22,11 @@ import android.widget.TextView.OnEditorActionListener;
 import com.tomogoma.shoppinglistapp.EditTextWithKeyBoardBackEvent;
 import com.tomogoma.shoppinglistapp.EditTextWithKeyBoardBackEvent.OnImeBackListener;
 import com.tomogoma.shoppinglistapp.R;
-import com.tomogoma.shoppinglistapp.TextFiltersAdapter;
 import com.tomogoma.shoppinglistapp.data.ContentLoader;
+import com.tomogoma.shoppinglistapp.data.ContentLoader.OnLoadFinishedListener;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
-import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity;
-import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemFragment;
+import com.tomogoma.shoppinglistapp.items.list.ListingActivity;
 import com.tomogoma.shoppinglistapp.util.Formatter;
 import com.tomogoma.shoppinglistapp.util.UI;
 
@@ -35,34 +34,63 @@ public abstract class ManipulateItemFragment extends Fragment
 		implements OnFocusChangeListener, OnEditorActionListener,
 		           OnImeBackListener, OnCheckedChangeListener {
 
-	public static final String EXTRA_String_CATEGORY_NAME = ManipulateItemFragment.class.getName() + "_extra.category.id";
-
-	protected EditText etVersion;
-	protected EditText etUnitPrice;
-	protected EditText etLastsFor;
-	protected EditText etQuantity;
-	protected EditText etDesc;
-	protected AutoCompleteTextView autoTvCategoryName;
-	protected AutoCompleteTextView autoTvItemName;
-	protected EditTextWithKeyBoardBackEvent etBrand;
-	protected EditTextWithKeyBoardBackEvent etActualMeasUnit;
-	protected TextView tvItemName;
-	protected TextView tvBrand;
-	protected TextView tvVersion;
-	protected TextView tvUnitPrice;
-	protected TextView tvActualMeasUnit;
-	protected TextView tvLastsFor;
-	protected TextView tvQuantity;
-	protected TextView tvCat;
-	protected TextView tvDesc;
-	protected RadioGroup rgLastsForUnit;
+	protected EditText mEtVersion;
+	protected EditText mEtUnitPrice;
+	protected EditText mEtLastsFor;
+	protected EditText mEtQuantity;
+	protected EditText mEtDesc;
+	protected AutoCompleteTextView mAutoTvCategoryName;
+	protected AutoCompleteTextView mAutoTvItemName;
+	protected EditTextWithKeyBoardBackEvent mEtBrand;
+	protected EditTextWithKeyBoardBackEvent mEtActualMeasUnit;
+	protected TextView mTvItemName;
+	protected TextView mTvBrand;
+	protected TextView mTvVersion;
+	protected TextView mTvUnitPrice;
+	protected TextView mTvActualMeasUnit;
+	protected TextView mTvLastsFor;
+	protected TextView mTvQuantity;
+	protected TextView mTvCat;
+	protected TextView mTvDesc;
+	protected RadioGroup mRgLastsForUnit;
 
 	protected String mLastsForUnit;
+	protected boolean mIsAutoTextViewAdaptersLoaded;
 
+	private ContentLoader mLoader;
 	private SimpleCursorAdapter mItemsAdapter;
 	private SimpleCursorAdapter mCategoriesAdapter;
+	private int mItemsLoaderID;
+	private int mCategoriesLoaderID;
 
 	protected abstract Intent processInput(String categoryName, String itemName);
+
+	private class OnAutoTVAdapterLoadFinishedListener implements OnLoadFinishedListener {
+
+		private boolean isOtherLoaded;
+
+		@Override
+		public void onLoadFinished(int id) {
+
+			if (mItemsLoaderID == id) {
+				updateLoaderFlagWhenReady();
+			}
+			else if (mCategoriesLoaderID == id) {
+				updateLoaderFlagWhenReady();
+			}
+		}
+
+		private synchronized void updateLoaderFlagWhenReady() {
+			if (isOtherLoaded) {
+				mIsAutoTextViewAdaptersLoaded = true;
+				onSuperAdaptersLoaded();
+			} else {
+				isOtherLoaded = true;
+			}
+		}
+	}
+
+	protected void onSuperAdaptersLoaded() {}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -99,9 +127,10 @@ public abstract class ManipulateItemFragment extends Fragment
 				CategoryEntry.COLUMN_NAME
 			};
 
-		ContentLoader loader = new ContentLoader(getActivity(), this);
-		loader.loadContent(itemUri, mItemsAdapter, itemProjection, itemSortOrder);
-		loader.loadContent(categoryUri, mCategoriesAdapter, categoryProjection, categorySortOrder);
+		mLoader = new ContentLoader(getActivity(), this);
+		mLoader.setOnLoadFinishedListener(new OnAutoTVAdapterLoadFinishedListener());
+		mItemsLoaderID = mLoader.loadContent(itemUri, mItemsAdapter, itemProjection, itemSortOrder);
+		mCategoriesLoaderID = mLoader.loadContent(categoryUri, mCategoriesAdapter, categoryProjection, categorySortOrder);
 
 		super.onActivityCreated(savedInstanceState);
 	}
@@ -112,64 +141,64 @@ public abstract class ManipulateItemFragment extends Fragment
 		if (hasFocus) {
 			switch (v.getId()) {
 				case R.id.categoryName:
-					tvCat.setVisibility(View.VISIBLE);
+					mTvCat.setVisibility(View.VISIBLE);
 					break;
 				case R.id.itemName:
-					tvItemName.setVisibility(View.VISIBLE);
+					mTvItemName.setVisibility(View.VISIBLE);
 					break;
 				case R.id.unitPrice:
-					setUnit(tvUnitPrice, R.string.price_hint_detail);
-					tvUnitPrice.setVisibility(View.VISIBLE);
+					setUnit(mTvUnitPrice, R.string.price_hint_detail);
+					mTvUnitPrice.setVisibility(View.VISIBLE);
 					break;
 				case R.id.quantityLayout:
-					setUnit(tvQuantity, R.string.quantity_hint_detail);
-					tvQuantity.setVisibility(View.VISIBLE);
+					setUnit(mTvQuantity, R.string.quantity_hint_detail);
+					mTvQuantity.setVisibility(View.VISIBLE);
 					break;
 				case R.id.brandName:
-					tvBrand.setVisibility(View.VISIBLE);
+					mTvBrand.setVisibility(View.VISIBLE);
 					break;
 				case R.id.versionName:
-					tvVersion.setVisibility(View.VISIBLE);
+					mTvVersion.setVisibility(View.VISIBLE);
 					break;
 				case R.id.measUnit:
-					tvActualMeasUnit.setVisibility(View.VISIBLE);
+					mTvActualMeasUnit.setVisibility(View.VISIBLE);
 					break;
 				case R.id.lastsFor:
-					tvLastsFor.setVisibility(View.VISIBLE);
+					mTvLastsFor.setVisibility(View.VISIBLE);
 					break;
 				case R.id.description:
-					tvDesc.setVisibility(View.VISIBLE);
+					mTvDesc.setVisibility(View.VISIBLE);
 					break;
 			}//switch
 		} else {
 			switch (v.getId()) {
 				case R.id.categoryName:
-					tvCat.setVisibility(View.GONE);
+					mTvCat.setVisibility(View.GONE);
 					break;
 				case R.id.itemName:
-					tvItemName.setVisibility(View.GONE);
+					mTvItemName.setVisibility(View.GONE);
 					break;
 				case R.id.unitPrice:
-					tvUnitPrice.setVisibility(View.GONE);
+					mTvUnitPrice.setVisibility(View.GONE);
 					break;
 				case R.id.quantityLayout:
-					tvQuantity.setVisibility(View.GONE);
+					mTvQuantity.setVisibility(View.GONE);
 					break;
 				case R.id.brandName:
-					tvBrand.setVisibility(View.GONE);
+					mTvBrand.setVisibility(View.GONE);
 					break;
 				case R.id.versionName:
-					tvVersion.setVisibility(View.GONE);
+					mTvVersion.setVisibility(View.GONE);
 					break;
 				case R.id.measUnit:
 					setLastsForVisibility();
-					tvActualMeasUnit.setVisibility(View.GONE);
+					mTvActualMeasUnit.setVisibility(View.GONE);
 					break;
 				case R.id.lastsFor:
-					tvLastsFor.setVisibility(View.GONE);
+					mTvLastsFor.setVisibility(View.GONE);
 					break;
 				case R.id.description:
-					tvDesc.setVisibility(View.GONE);
+					mTvDesc.setVisibility(View.GONE);
 					break;
 			}//switch
 		}//if...else
@@ -209,8 +238,8 @@ public abstract class ManipulateItemFragment extends Fragment
 
 	public Intent processInput() {
 
-		String itemName = autoTvItemName.getText().toString();
-		String categoryName = autoTvCategoryName.getText().toString();
+		String itemName = mAutoTvItemName.getText().toString();
+		String categoryName = mAutoTvCategoryName.getText().toString();
 		if (!validate(itemName, categoryName)) {
 			return null;
 		}
@@ -221,8 +250,8 @@ public abstract class ManipulateItemFragment extends Fragment
 
 		if (categoryName.isEmpty() && itemName.isEmpty()) {
 
-			autoTvItemName.setError(getString(R.string.error_inputViewErr_missing_item));
-			autoTvCategoryName.setError(getString(R.string.error_inputViewErr_missing_category));
+			mAutoTvItemName.setError(getString(R.string.error_inputViewErr_missing_item));
+			mAutoTvCategoryName.setError(getString(R.string.error_inputViewErr_missing_category));
 
 			String errorMessage = getString(R.string.error_toast_missing_item_or_category);
 			UI.showKeyboardToast(getActivity(), errorMessage);
@@ -236,8 +265,8 @@ public abstract class ManipulateItemFragment extends Fragment
 	protected Intent packageResultIntent(long categoryID, String categoryName) {
 
 		Intent resultIntent = new Intent();
-		resultIntent.putExtra(AddItemActivity.EXTRA_long_CATEGORY_ID, categoryID);
-		resultIntent.putExtra(AddItemActivity.EXTRA_String_CATEGORY_NAME, categoryName);
+		resultIntent.putExtra(ListingActivity.EXTRA_long_CATEGORY_ID, categoryID);
+		resultIntent.putExtra(ListingActivity.EXTRA_String_CATEGORY_NAME, categoryName);
 		return resultIntent;
 	}
 
@@ -254,38 +283,38 @@ public abstract class ManipulateItemFragment extends Fragment
 	}
 
 	protected void setCategoryNameField(String categoryName) {
-		autoTvCategoryName.setText(categoryName);
+		mAutoTvCategoryName.setText(categoryName);
 	}
 
 	private void setLastsForVisibility() {
 
-		if (etActualMeasUnit.getText().toString().isEmpty()) {
-			rgLastsForUnit.setVisibility(View.GONE);
-			etLastsFor.setVisibility(View.GONE);
+		if (mEtActualMeasUnit.getText().toString().isEmpty()) {
+			mRgLastsForUnit.setVisibility(View.GONE);
+			mEtLastsFor.setVisibility(View.GONE);
 			return;
 		}
 
-		String measUnit = etActualMeasUnit.getText().toString();
+		String measUnit = mEtActualMeasUnit.getText().toString();
 		String hintDetStr = getResources().getString(R.string.useful_per_actual_hint_detail);
 		hintDetStr = String.format(hintDetStr, measUnit, mLastsForUnit);
-		tvLastsFor.setText(hintDetStr);
-		etLastsFor.setVisibility(View.VISIBLE);
-		rgLastsForUnit.setVisibility(View.VISIBLE);
+		mTvLastsFor.setText(hintDetStr);
+		mEtLastsFor.setVisibility(View.VISIBLE);
+		mRgLastsForUnit.setVisibility(View.VISIBLE);
 	}
 
 	private void setVersionVisibility() {
 
-		if (etBrand.getText().toString().isEmpty()) {
-			etVersion.setVisibility(View.GONE);
+		if (mEtBrand.getText().toString().isEmpty()) {
+			mEtVersion.setVisibility(View.GONE);
 			return;
 		}
-		etVersion.setVisibility(View.VISIBLE);
+		mEtVersion.setVisibility(View.VISIBLE);
 	}
 
 	private void setUnit(TextView descriptionView, int stringId) {
 
 		String description = getResources().getString(stringId);
-		String unit = etActualMeasUnit.getText().toString();
+		String unit = mEtActualMeasUnit.getText().toString();
 		unit = Formatter.formatMeasUnit(unit);
 		descriptionView.setText(String.format(description, unit));
 	}
@@ -308,55 +337,55 @@ public abstract class ManipulateItemFragment extends Fragment
 
 		mItemsAdapter.getStringConversionColumn();
 
-		autoTvCategoryName = (AutoCompleteTextView) rootView.findViewById(R.id.categoryName);
-		autoTvItemName = (AutoCompleteTextView) rootView.findViewById(R.id.itemName);
+		mAutoTvCategoryName = (AutoCompleteTextView) rootView.findViewById(R.id.categoryName);
+		mAutoTvItemName = (AutoCompleteTextView) rootView.findViewById(R.id.itemName);
 
-		autoTvCategoryName.setAdapter(mCategoriesAdapter);
-		autoTvItemName.setAdapter(mItemsAdapter);
+		mAutoTvCategoryName.setAdapter(mCategoriesAdapter);
+		mAutoTvItemName.setAdapter(mItemsAdapter);
 
-		etUnitPrice = (EditText) rootView.findViewById(R.id.unitPrice);
-		etQuantity = (EditText) rootView.findViewById(R.id.quantity);
-		etVersion = (EditText) rootView.findViewById(R.id.versionName);
-		etLastsFor = (EditText) rootView.findViewById(R.id.lastsFor);
-		etDesc = (EditText) rootView.findViewById(R.id.description);
+		mEtUnitPrice = (EditText) rootView.findViewById(R.id.unitPrice);
+		mEtQuantity = (EditText) rootView.findViewById(R.id.quantity);
+		mEtVersion = (EditText) rootView.findViewById(R.id.versionName);
+		mEtLastsFor = (EditText) rootView.findViewById(R.id.lastsFor);
+		mEtDesc = (EditText) rootView.findViewById(R.id.description);
 
-		etBrand = (EditTextWithKeyBoardBackEvent) rootView.findViewById(R.id.brandName);
-		etActualMeasUnit = (EditTextWithKeyBoardBackEvent) rootView.findViewById(R.id.measUnit);
+		mEtBrand = (EditTextWithKeyBoardBackEvent) rootView.findViewById(R.id.brandName);
+		mEtActualMeasUnit = (EditTextWithKeyBoardBackEvent) rootView.findViewById(R.id.measUnit);
 
-		rgLastsForUnit = (RadioGroup) rootView.findViewById(R.id.lastsForUnit);
+		mRgLastsForUnit = (RadioGroup) rootView.findViewById(R.id.lastsForUnit);
 
-		tvCat = (TextView) rootView.findViewById(R.id.categoryNameHint);
-		tvItemName = (TextView) rootView.findViewById(R.id.itemNameHint);
-		tvUnitPrice = (TextView) rootView.findViewById(R.id.unitPriceHint);
-		tvBrand = (TextView) rootView.findViewById(R.id.brandNameHint);
-		tvActualMeasUnit = (TextView) rootView.findViewById(R.id.measUnitHint);
-		tvQuantity = (TextView) rootView.findViewById(R.id.quantityHint);
-		tvVersion = (TextView) rootView.findViewById(R.id.versionNameHint);
-		tvLastsFor = (TextView) rootView.findViewById(R.id.lastsForHint);
-		tvDesc = (TextView) rootView.findViewById(R.id.descriptionHint);
+		mTvCat = (TextView) rootView.findViewById(R.id.categoryNameHint);
+		mTvItemName = (TextView) rootView.findViewById(R.id.itemNameHint);
+		mTvUnitPrice = (TextView) rootView.findViewById(R.id.unitPriceHint);
+		mTvBrand = (TextView) rootView.findViewById(R.id.brandNameHint);
+		mTvActualMeasUnit = (TextView) rootView.findViewById(R.id.measUnitHint);
+		mTvQuantity = (TextView) rootView.findViewById(R.id.quantityHint);
+		mTvVersion = (TextView) rootView.findViewById(R.id.versionNameHint);
+		mTvLastsFor = (TextView) rootView.findViewById(R.id.lastsForHint);
+		mTvDesc = (TextView) rootView.findViewById(R.id.descriptionHint);
 
-		autoTvItemName.setOnFocusChangeListener(this);
-		etUnitPrice.setOnFocusChangeListener(this);
-		etBrand.setOnFocusChangeListener(this);
-		etActualMeasUnit.setOnFocusChangeListener(this);
-		etQuantity.setOnFocusChangeListener(this);
-		autoTvCategoryName.setOnFocusChangeListener(this);
-		etVersion.setOnFocusChangeListener(this);
-		rgLastsForUnit.setOnFocusChangeListener(this);
-		etLastsFor.setOnFocusChangeListener(this);
-		etDesc.setOnFocusChangeListener(this);
+		mAutoTvItemName.setOnFocusChangeListener(this);
+		mEtUnitPrice.setOnFocusChangeListener(this);
+		mEtBrand.setOnFocusChangeListener(this);
+		mEtActualMeasUnit.setOnFocusChangeListener(this);
+		mEtQuantity.setOnFocusChangeListener(this);
+		mAutoTvCategoryName.setOnFocusChangeListener(this);
+		mEtVersion.setOnFocusChangeListener(this);
+		mRgLastsForUnit.setOnFocusChangeListener(this);
+		mEtLastsFor.setOnFocusChangeListener(this);
+		mEtDesc.setOnFocusChangeListener(this);
 
-		etBrand.setOnEditorActionListener(this);
-		etActualMeasUnit.setOnEditorActionListener(this);
+		mEtBrand.setOnEditorActionListener(this);
+		mEtActualMeasUnit.setOnEditorActionListener(this);
 
-		rgLastsForUnit.setOnCheckedChangeListener(this);
-		onCheckedChanged(rgLastsForUnit, rgLastsForUnit.getCheckedRadioButtonId());
+		mRgLastsForUnit.setOnCheckedChangeListener(this);
+		onCheckedChanged(mRgLastsForUnit, mRgLastsForUnit.getCheckedRadioButtonId());
 
-		etBrand.setOnEditTextImeBackListener(this);
-		etActualMeasUnit.setOnEditTextImeBackListener(this);
+		mEtBrand.setOnEditTextImeBackListener(this);
+		mEtActualMeasUnit.setOnEditTextImeBackListener(this);
 
 		String categoryName = getArguments().getString(
-				AddItemFragment.EXTRA_String_CATEGORY_NAME, CategoryEntry.DEFAULT_NAME);
+				ListingActivity.EXTRA_String_CATEGORY_NAME, CategoryEntry.DEFAULT_NAME);
 		setCategoryNameField(categoryName);
 	}
 

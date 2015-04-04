@@ -13,7 +13,7 @@ public class Currency {
 
 	/**
 	 * Constructor
-	 * Initializes the latest conversion to 1d
+	 * Initializes with the latest conversion as 1d
 	 * See {@link #Currency(String, String, String, String, double)}
 	 */
 	public Currency(String code, String symbol, String name, String country) {
@@ -22,15 +22,12 @@ public class Currency {
 
 	/**
 	 * Constructor
-	 * </p>
+	 * <p>
 	 * Note that:
-	 * </p>
-	 * code cannot be null or empty
-	 * </p>
-	 * symbol cannot be null but an empty String is allowed
-	 * </p>
-	 * lastConversion cannot be <= 0
-	 * </p>
+	 * <p>
+	 * code cannot be null or empty;
+	 * symbol cannot be null but an empty String is allowed;
+	 * lastConversion cannot be <= 0;
 	 * If country/name are null by the time their getters are called, an
 	 * {@link java.lang.UnsupportedOperationException} will be thrown
 	 * </p>
@@ -49,7 +46,7 @@ public class Currency {
 			throw new IllegalArgumentException("symbol cannot be empty");
 		}
 		if (lastConversion <= 0d) {
-			throw new IllegalArgumentException("last conversion cannot be less than 1d");
+			throw new IllegalArgumentException("last conversion cannot be <= 0d");
 		}
 		mCode = code;
 		mSymbol = symbol;

@@ -5,11 +5,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.tomogoma.shoppinglistapp.R;
-import com.tomogoma.shoppinglistapp.items.list.CategoriesFragment.OnCategorySelectedListener;
+import com.tomogoma.shoppinglistapp.items.list.CategoryListingFragment.OnCategorySelectedListener;
 import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity;
 
 
-public class CategoryListingActivity extends ItemsActivity implements OnCategorySelectedListener {
+public class CategoryListingActivity extends ListingActivity implements OnCategorySelectedListener {
 
 	private static final String SAVED_STATE_IS_CATEGORY_SELECTED = "saved.is.category.selected";
 
@@ -33,14 +33,15 @@ public class CategoryListingActivity extends ItemsActivity implements OnCategory
 
 		if (savedInstanceState == null) {
 
-			CategoriesFragment categoriesFragment = new CategoriesFragment();
-			Bundle arguments = new Bundle();
-			arguments.putLong(CategoriesFragment.EXTRA_long_CATEGORY_ID, mCategoryID);
-			categoriesFragment.setArguments(arguments);
-			addFragment(R.id.selectionContainer, categoriesFragment);
+			CategoryListingFragment categoryListingFragment = new CategoryListingFragment();
+			mArguments.putBoolean(CategoryListingFragment.EXTRA_boolean_IS_ONLY_PANE, !mIsTwoPane);
+			categoryListingFragment.setArguments(mArguments);
+			addFragment(R.id.selectionContainer, categoryListingFragment);
 
 			if (mIsTwoPane) {
-				addFragment(R.id.detailsContainer, new ItemsFragment());
+				ItemListingFragment itemListingFragment = new ItemListingFragment();
+				itemListingFragment.setArguments(mArguments);
+				addFragment(R.id.detailsContainer, itemListingFragment);
 			}
 		}
 		else {
@@ -90,7 +91,7 @@ public class CategoryListingActivity extends ItemsActivity implements OnCategory
 
 	private void showItemsForCategory(Bundle arguments) {
 
-		Fragment itemsFragment = new ItemsFragment();
+		Fragment itemsFragment = new ItemListingFragment();
 		itemsFragment.setArguments(arguments);
 		replaceFragment(R.id.detailsContainer, itemsFragment);
 	}

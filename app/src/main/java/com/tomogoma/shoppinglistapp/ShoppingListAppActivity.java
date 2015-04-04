@@ -73,6 +73,7 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 			case android.R.id.home: {
 
 				Intent upIntent = new Intent(this, mParentActivity);
+				addToUpActionIntent(upIntent);
 				if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
 					TaskStackBuilder.create(this)
 					                .addNextIntentWithParentStack(upIntent)
@@ -86,6 +87,13 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	/**
+	 * Override this if you want to provide extra data for the class you provided in
+	 * {@link #getParentActivity()}.
+	 * @param upIntent
+	 */
+	protected void addToUpActionIntent(Intent upIntent) {}
+
 	protected void addFragment(int containerID, Fragment fragment) {
 
 		getSupportFragmentManager()
@@ -95,7 +103,7 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 	}
 
 	/**
-	 * Convenience method for replacing a fragment with another
+	 * Convenience method for replacing a fragment with another.
 	 * </p>
 	 * NOTE: The ActionBar is set to be the app_name string resource
 	 * @param containerID

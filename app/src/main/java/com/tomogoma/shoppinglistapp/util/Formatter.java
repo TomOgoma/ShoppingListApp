@@ -32,19 +32,7 @@ public class Formatter {
 
 		String preferredCode = preferredCurrency.getCode();
 
-		//  convert price if preferred currency is different from the one originally bound
-		if (!boundCode.equals(preferredCode)) {
-
-			//  First convert from bound currency to our base (default) currency
-			if (!boundCode.equals(CurrencyEntry.DEFAULT_CODE)) {
-				price = price / boundConversion;
-			}
-
-			// Finally convert from base (default) currency to preferred currency
-			if (!preferredCode.equals(CurrencyEntry.DEFAULT_CODE)) {
-				price = price * preferredCurrency.getLastConversion();
-			}
-		}
+		price = convertPrice(price, boundCode, boundConversion, preferredCode, preferredCurrency.getLastConversion());
 
 		java.util.Currency currency = java.util.Currency.getInstance(preferredCode);
 		sNumberFormat.setCurrency(currency);
@@ -55,10 +43,31 @@ public class Formatter {
 			((DecimalFormat) sNumberFormat).setDecimalSeparatorAlwaysShown(true);
 			((DecimalFormat) sNumberFormat).setGroupingSize(3);
 		}
+
 		return new StringBuilder()
 				.append(formatCurrency(preferredCurrency))
 				.append(sNumberFormat.format(price))
 				.toString();
+	}
+
+	public static double convertPrice(Double price, String boundCode,
+	                                  double boundConversion, String preferredCode, double latestConversion) {
+
+		//  convert price if preferred currency is different from the one originally bound
+		if (!boundCode.equals(preferredCode)) {
+
+			//  First convert from bound currency to our base (default) currency
+			if (!boundCode.equals(CurrencyEntry.DEFAULT_CODE)) {
+				price = price / boundConversion;
+			}
+
+			// Finally convert from base (default) currency to preferred currency
+			if (!preferredCode.equals(CurrencyEntry.DEFAULT_CODE)) {
+				price = price * latestConversion;
+			}
+		}
+
+		return price;
 	}
 
 	public static String formatUnitPrice(double price, String boundCode,

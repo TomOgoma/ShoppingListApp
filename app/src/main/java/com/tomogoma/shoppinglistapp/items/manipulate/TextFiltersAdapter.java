@@ -1,4 +1,4 @@
-package com.tomogoma.shoppinglistapp;
+package com.tomogoma.shoppinglistapp.items.manipulate;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -11,10 +11,9 @@ import android.widget.FilterQueryProvider;
  */
 public class TextFiltersAdapter extends SimpleCursorAdapter {
 
-	private String columnFrom;
-	private String idColumn;
-	private Uri providerUri;
-	private Context context;
+	private String mColumnFrom;
+	private String mIDColumn;
+	private Uri mProviderUri;
 
 	public TextFiltersAdapter(Context context, Uri providerUri, String idColumn, String columnFrom) {
 
@@ -27,10 +26,9 @@ public class TextFiltersAdapter extends SimpleCursorAdapter {
 				0
 		);
 
-		this.columnFrom = columnFrom;
-		this.idColumn = idColumn;
-		this.providerUri = providerUri;
-		this.context = context;
+		this.mColumnFrom = columnFrom;
+		this.mIDColumn = idColumn;
+		this.mProviderUri = providerUri;
 
 		setFilterQueryProvider(new TextFilterQueryProvider());
 		setCursorToStringConverter(new TextCursorToStringConverter());
@@ -41,11 +39,11 @@ public class TextFiltersAdapter extends SimpleCursorAdapter {
 		@Override
 		public android.database.Cursor runQuery(CharSequence str) {
 
-			String selection = columnFrom + " LIKE ? ";
+			String selection = mColumnFrom + " LIKE ? ";
 			String[] selectionArgs = {"%" + str + "%"};
-			String[] projection = new String[]{idColumn, columnFrom};
-			return context.getContentResolver()
-			              .query(providerUri, projection, selection, selectionArgs, null);
+			String[] projection = new String[]{mIDColumn, mColumnFrom};
+			return mContext.getContentResolver()
+			              .query(mProviderUri, projection, selection, selectionArgs, null);
 		}
 	}
 
@@ -54,7 +52,7 @@ public class TextFiltersAdapter extends SimpleCursorAdapter {
 		@Override
 		public CharSequence convertToString(Cursor cursor) {
 
-			int index = cursor.getColumnIndex(columnFrom);
+			int index = cursor.getColumnIndex(mColumnFrom);
 			return cursor.getString(index);
 		}
 	}

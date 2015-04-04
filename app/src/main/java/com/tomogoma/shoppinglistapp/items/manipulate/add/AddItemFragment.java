@@ -44,8 +44,8 @@ public class AddItemFragment extends ManipulateItemFragment {
 
 		long itemID = DBUpdateHelper.addItem(
 				getActivity(),
-				new Item(categoryID, mLastsForUnit, autoTvItemName, etUnitPrice,
-				         etQuantity, etLastsFor, etActualMeasUnit, etDesc)
+				new Item(categoryID, mLastsForUnit, mAutoTvItemName, mEtUnitPrice,
+				         mEtQuantity, mEtLastsFor, mEtActualMeasUnit, mEtDesc)
 		);
 
 		if (itemID == -1) {

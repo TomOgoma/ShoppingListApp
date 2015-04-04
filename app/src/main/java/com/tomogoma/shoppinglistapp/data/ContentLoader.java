@@ -19,17 +19,20 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 	private static int sLastLoaderID;
 	private static HashMap<Integer, LoaderData> sLoaderDataMap = new HashMap<>();
 
-	private Context context;
-	private Fragment fragment;
+	private Context mContext;
+	private Fragment mFragment;
 	private OnLoadFinishedListener mLoadFinishedCallBack;
 
-	private enum ReceiverType {CURSOR, CURSOR_ADAPTER}
+	private static enum ReceiverType {
+		CURSOR,
+		CURSOR_ADAPTER
+	}
 
-	private class LoaderData {
+	private static class LoaderData {
 
 		private int id;
 		private Uri providerUri;
-		private ReceiverType mReceiverType;
+		private ReceiverType receiverType;
 		private Cursor cursor;
 		private CursorAdapter cursorAdapter;
 		private String[] projection;
@@ -40,7 +43,7 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 		public LoaderData(Uri providerUri, CursorAdapter cursorAdapter,
 		                  int id, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
-			mReceiverType = ReceiverType.CURSOR_ADAPTER;
+			receiverType = ReceiverType.CURSOR_ADAPTER;
 			this.cursorAdapter = cursorAdapter;
 			initMembers(providerUri, id, projection, selection, selectionArgs, sortOrder);
 		}
@@ -48,7 +51,7 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 		public LoaderData(Uri providerUri,  int id, String[] projection,
 		                  String selection, String[] selectionArgs, String sortOrder) {
 
-			mReceiverType = ReceiverType.CURSOR;
+			receiverType = ReceiverType.CURSOR;
 			initMembers(providerUri, id, projection, selection, selectionArgs, sortOrder);
 		}
 
@@ -68,16 +71,17 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 	}
 
 	public ContentLoader(Context context, Fragment fragment) {
-
-		this.context = context;
-		this.fragment = fragment;
+		mContext = context;
+		mFragment = fragment;
 	}
 
-	public <U extends CursorAdapter> int loadContent(Uri providerUri, U cursorAdapter, String[] projection, String sortOrder) {
+	public <U extends CursorAdapter>
+	int loadContent(Uri providerUri, U cursorAdapter, String[] projection, String sortOrder) {
 		return loadContent(providerUri, cursorAdapter, projection, null, null, sortOrder);
 	}
 
-	public <U extends CursorAdapter> int loadContent(Uri providerUri, U cursorAdapter, String[] projection, String selection,
+	public <U extends CursorAdapter>
+	int loadContent(Uri providerUri, U cursorAdapter, String[] projection, String selection,
 	                                                 String[] selectionArgs, String sortOrder) {
 
 		int id = getMyLoaderID();
@@ -116,7 +120,7 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 		}
 
 		return new CursorLoader(
-				context,
+				mContext,
 				loaderData.providerUri,
 				loaderData.projection,
 				loaderData.selection,
@@ -134,7 +138,7 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 			return;
 		}
 
-		switch (loaderData.mReceiverType) {
+		switch (loaderData.receiverType) {
 			case CURSOR_ADAPTER:
 				loaderData.cursorAdapter.swapCursor(data);
 			case CURSOR:
@@ -156,7 +160,7 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 			return;
 		}
 
-		switch (loaderData.mReceiverType) {
+		switch (loaderData.receiverType) {
 			case CURSOR_ADAPTER:
 				loaderData.cursorAdapter.swapCursor(null);
 			case CURSOR:
@@ -168,7 +172,7 @@ public class ContentLoader implements LoaderCallbacks<Cursor> {
 	private int loadContent(LoaderData loaderData) {
 
 		sLoaderDataMap.put(loaderData.id, loaderData);
-		fragment.getLoaderManager().initLoader(loaderData.id, null, this);
+		mFragment.getLoaderManager().initLoader(loaderData.id, null, this);
 		return loaderData.id;
 	}
 

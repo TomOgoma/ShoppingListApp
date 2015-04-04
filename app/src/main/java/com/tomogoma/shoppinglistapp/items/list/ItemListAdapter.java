@@ -1,4 +1,4 @@
-package com.tomogoma.shoppinglistapp.items;
+package com.tomogoma.shoppinglistapp.items.list;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -9,12 +9,10 @@ import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tomogoma.shoppinglistapp.R;
@@ -22,14 +20,13 @@ import com.tomogoma.shoppinglistapp.data.Currency;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.util.Formatter;
-import com.tomogoma.shoppinglistapp.util.UI;
 
 /**
  * Created by ogoma on 24/02/15.
  */
 public class ItemListAdapter extends CursorAdapter {
 
-	public static final String[] S_ITEMS_PROJECTION = new String[]{
+	public static final String[] ITEMS_PROJECTION = new String[]{
 			ItemEntry.TABLE_NAME + "." + ItemEntry._ID,
 			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_NAME,
 			ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_DESC,
@@ -58,6 +55,10 @@ public class ItemListAdapter extends CursorAdapter {
 	private static final int SELECTED_VIEW_TYPE = 0;
 	private static final int NORMAL_VIEW_TYPE = 1;
 
+	private OnSelectionRetrievedListener mOnSelectionRetrievedCallback;
+	private Currency mCurrency;
+	private int mSelectedPosition = -1;
+
 	private class ViewHolder {
 
 		private TextView title;
@@ -78,21 +79,11 @@ public class ItemListAdapter extends CursorAdapter {
 		}
 	}
 
-	private Currency mCurrency;
-	private int mSelectedPosition = -1;
-	private OnEditItemRequestListener mOnEditItemRequestListener;
-	private OnDeleteItemRequestListener mOnDeleteItemRequestListener;
-
-	public interface OnEditItemRequestListener {
-		public void onEditItemRequested(long itemID);
-	}
-
-	public interface OnDeleteItemRequestListener {
-		public void onDeleteItemRequested(long itemID, String name);
+	public interface OnSelectionRetrievedListener {
+		public void onSelectionRetrieved(long itemID, String name);
 	}
 
 	public ItemListAdapter(Activity activity) {
-
 		super(activity, null, 0);
 	}
 
@@ -168,8 +159,6 @@ public class ItemListAdapter extends CursorAdapter {
 		}
 
 		TextView title = (TextView) view.findViewById(R.id.title);
-		ImageView imgEditItem = (ImageView) view.findViewById(R.id.editItem);
-		ImageView imgDeleteItem = (ImageView) view.findViewById(R.id.deleteItem);
 		CheckBox shoppingListAdd = (CheckBox) view.findViewById(R.id.shoppingListAdd);
 		TextView versionName = (TextView) view.findViewById(R.id.versionName);
 		TextView unitPrice = (TextView) view.findViewById(R.id.unitPrice);
@@ -203,31 +192,13 @@ public class ItemListAdapter extends CursorAdapter {
 		setPrice(unitPrice, totalPrice, price, qtty, saveTimeCode, saveTimeConversion);
 		setInList(shoppingListAdd, itemID, inList);
 
-		imgEditItem.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mOnEditItemRequestListener != null) {
-					mOnEditItemRequestListener.onEditItemRequested(itemID);
-				}
-			}
-		});
-
-		imgDeleteItem.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mOnDeleteItemRequestListener != null) {
-					mOnDeleteItemRequestListener.onDeleteItemRequested(itemID, name);
-				}
-			}
-		});
+		if (mOnSelectionRetrievedCallback != null) {
+			mOnSelectionRetrievedCallback.onSelectionRetrieved(itemID, name);
+		}
 	}
 
-	public void setOnEditItemRequestListener(OnEditItemRequestListener listener) {
-		mOnEditItemRequestListener = listener;
-	}
-
-	public void setOnDeleteItemRequestListener(OnDeleteItemRequestListener listener) {
-		mOnDeleteItemRequestListener = listener;
+	public void setOnSelectionIDRetrievedListener(OnSelectionRetrievedListener listener) {
+		mOnSelectionRetrievedCallback = listener;
 	}
 
 	public void setSelectedPosition(int position) {
@@ -336,7 +307,6 @@ public class ItemListAdapter extends CursorAdapter {
 
 	private void fallBackToDefaultCurrency() {
 		Log.e(LOG_TAG, "Failed to load preferred currency");
-		UI.showToast(mContext, mContext.getString(R.string.error_toast_fetch_preferred_currency_too_late));
 		mCurrency = new Currency(
 				CurrencyEntry.DEFAULT_CODE,
 				CurrencyEntry.DEFAULT_SYMBOL,

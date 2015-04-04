@@ -56,8 +56,7 @@
 	<!--Error Toast Messages-->
 	<string name="error_toast_http_fetch_currencies">Unable to get currencies list due to connectivity problems</string>
 	<string name="error_toast_fetch_currencies">Unable to get currencies list due to unexpected problems</string>
-	<string name="error_toast_fetch_preferred_currency_too_late">Failed to load preferred currency, falling back to default;
-		reloading the screen may help</string>
+	<string name="error_toast_fetch_preferred_currency_fail">Failed to load preferred currency, falling back to default</string>
 	<string name="error_toast_loading_data">An error occurred loading data, please try again</string>
 	<string name="error_toast_db_delete_fail">failed to delete the item, please try again</string>
 	<string name="error_toast_db_update_fail">failed to update the item: <xliff:g id="itemName">%s</xliff:g>, please try again</string>

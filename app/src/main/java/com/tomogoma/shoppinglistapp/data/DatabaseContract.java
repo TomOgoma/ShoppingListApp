@@ -114,22 +114,26 @@ public class DatabaseContract {
 			                  .build();
 		}
 
+		public static Uri buildItemCurrencyUri(long itemID) {
+			Uri uri = buildItemUri(itemID);
+			return uri.buildUpon()
+			                  .appendQueryParameter(PATH_CURRENCY,  "1")
+			                  .appendQueryParameter(PARAM_DISTINCT,  "1")
+			                  .build();
+		}
+
 		public static String getCategoryIDFromUri(Uri uri) {
 			return uri.getQueryParameter(PATH_CATEGORY);
 		}
 
 		public static boolean isToInnerJoinCurrency(Uri uri) {
 			String param = uri.getQueryParameter(PATH_CURRENCY);
-			if (param == null)
-				return false;
-			return param.equals("1");
+			return param != null && param.equals("1");
 		}
 
 		public static boolean isToSelectDistinct(Uri uri) {
 			String param = uri.getQueryParameter(PARAM_DISTINCT);
-			if (param == null)
-				return false;
-			return param.equals("1");
+			return param != null && param.equals("1");
 		}
 	}
 

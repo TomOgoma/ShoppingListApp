@@ -4,39 +4,24 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.tomogoma.shoppinglistapp.R;
-import com.tomogoma.shoppinglistapp.items.list.CategoryListingActivity;
-import com.tomogoma.shoppinglistapp.items.manipulate.DoneActionActivity;
+import com.tomogoma.shoppinglistapp.items.list.ListingActivity;
+import com.tomogoma.shoppinglistapp.items.manipulate.ManipulateItemActivity;
 
-public class EditItemActivity extends DoneActionActivity {
-
-	public static final String EXTRA_String_CATEGORY_NAME = EditItemActivity.class.getName() + "_extra.category.name";
-	public static final String EXTRA_long_ITEM_ID = EditItemActivity.class.getName() + "_extra.item.id";
-	public static final String EXTRA_Class_CALLING_ACTIVITY = EditItemActivity.class.getName() + "_extra.calling.activity";
-
-	private Class<?> mParentActivity;
-
-	protected Class<?> getParentActivity() {
-		return mParentActivity;
-	}
+public class EditItemActivity extends ManipulateItemActivity {
 
 	@Override
 	protected void onSuperCreate(Bundle savedInstanceState) {
 
+		super.onSuperCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_item);
 
 		if (savedInstanceState == null) {
 
-			String categoryName = getIntent().getStringExtra(EXTRA_String_CATEGORY_NAME);
-			long itemID = getIntent().getLongExtra(EXTRA_long_ITEM_ID, -1);
-			mParentActivity = (Class<?>) getIntent().getSerializableExtra(EXTRA_Class_CALLING_ACTIVITY);
-			mParentActivity = (mParentActivity==null)? CategoryListingActivity.class: mParentActivity;
-
-			Bundle arguments = new Bundle();
-			arguments.putLong(EditItemFragment.EXTRA_long_ITEM_ID, itemID);
-			arguments.putString(EditItemFragment.EXTRA_String_CATEGORY_NAME, categoryName);
+			long itemID = getIntent().getLongExtra(ListingActivity.EXTRA_long_ITEM_ID, -1);
+			mArguments.putLong(ListingActivity.EXTRA_long_ITEM_ID, itemID);
 
 			EditItemFragment editItemFragment = new EditItemFragment();
-			editItemFragment.setArguments(arguments);
+			editItemFragment.setArguments(mArguments);
 
 			getSupportFragmentManager()
 					.beginTransaction()

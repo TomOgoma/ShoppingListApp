@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<!--Colors-->
+
 	<color name="grey_light">#e3e3e3</color>
+
+	<!--Elements-->
+
+	<color name="activated_item">@color/grey_light</color>
 </resources>

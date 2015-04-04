@@ -8,7 +8,7 @@ import android.widget.EditText;
 
 public class EditTextWithKeyBoardBackEvent extends EditText {
 
-	private OnImeBackListener onImeCallBack;
+	private OnImeBackListener mOnImeCallBack;
 
 	public EditTextWithKeyBoardBackEvent(Context context) {
 		super(context);
@@ -27,15 +27,15 @@ public class EditTextWithKeyBoardBackEvent extends EditText {
 	public boolean onKeyPreIme(int keyCode, KeyEvent event) {
 		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK
 				&& event.getAction() == KeyEvent.ACTION_UP) {
-			if (onImeCallBack != null) {
-				onImeCallBack.onImeBack(this, this.getText().toString());
+			if (mOnImeCallBack != null) {
+				mOnImeCallBack.onImeBack(this, this.getText().toString());
 			}
 		}
 		return super.dispatchKeyEvent(event);
 	}
 
 	public void setOnEditTextImeBackListener(OnImeBackListener listener) {
-		onImeCallBack = listener;
+		mOnImeCallBack = listener;
 	}
 
 	public static interface OnImeBackListener {

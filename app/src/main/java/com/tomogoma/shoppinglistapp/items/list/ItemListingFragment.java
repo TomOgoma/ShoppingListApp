@@ -1,7 +1,6 @@
 package com.tomogoma.shoppinglistapp.items.list;
 
-import android.content.ContentResolver;
-import android.content.Intent;
+import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,29 +20,37 @@ import com.tomogoma.shoppinglistapp.data.Currency;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
-import com.tomogoma.shoppinglistapp.items.ItemListAdapter;
-import com.tomogoma.shoppinglistapp.items.ItemListAdapter.OnDeleteItemRequestListener;
-import com.tomogoma.shoppinglistapp.items.ItemListAdapter.OnEditItemRequestListener;
-import com.tomogoma.shoppinglistapp.items.manipulate.edit.EditItemActivity;
+import com.tomogoma.shoppinglistapp.items.list.ItemListAdapter.OnSelectionRetrievedListener;
 import com.tomogoma.shoppinglistapp.util.Preference;
 import com.tomogoma.shoppinglistapp.util.UI;
 
 /**
  * Created by ogoma on 01/03/15.
  */
-public class ItemsFragment extends Fragment
-		implements OnItemClickListener, OnEditItemRequestListener, OnDeleteItemRequestListener, OnLoadFinishedListener {
+public class ItemListingFragment extends Fragment
+		implements OnItemClickListener, OnLoadFinishedListener, OnSelectionRetrievedListener {
 
-	public static final String EXTRA_long_CATEGORY_ID = ItemsFragment.class.getName() + "_extra.category.id";
-	public static final String EXTRA_String_CATEGORY_NAME = ItemsFragment.class.getName() + "_extra.category.name";
+	private static final String LOG_TAG = ItemListingFragment.class.getSimpleName();
 
-	private static final String LOG_TAG = ItemsFragment.class.getSimpleName();
-
-	private ItemListAdapter itemsAdapter;
-	private long mCategoryID;
+	private OnRequestPopulateActionsListener mOnItemSelectedCallback;
+	private ItemListAdapter mItemsAdapter;
 	private String mCategoryName;
-	private int mCurrencyLoaderID;
 	private ContentLoader mContentLoader;
+	private long mCategoryID;
+	private int mCurrencyLoaderID;
+	private int mItemsLoaderID;
+	private boolean mIsItemsLoaded;
+
+	public interface OnRequestPopulateActionsListener {
+		public void onRequestPopulateActions(long itemID, String itemName);
+		public void onRequestDepopulateActions();
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		mOnItemSelectedCallback = (OnRequestPopulateActionsListener) activity;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -56,9 +63,9 @@ public class ItemsFragment extends Fragment
 			mCategoryID = CategoryEntry.DEFAULT_ID;
 			mCategoryName = CategoryEntry.DEFAULT_NAME;
 		} else {
-			mCategoryID = arguments.getLong(EXTRA_long_CATEGORY_ID,
+			mCategoryID = arguments.getLong(ListingActivity.EXTRA_long_CATEGORY_ID,
 			                                CategoryEntry.DEFAULT_ID);
-			mCategoryName = arguments.getString(EXTRA_String_CATEGORY_NAME,
+			mCategoryName = arguments.getString(ListingActivity.EXTRA_String_CATEGORY_NAME,
 			                                    CategoryEntry.DEFAULT_NAME);
 		}
 	}
@@ -67,14 +74,13 @@ public class ItemsFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 		View rootView = inflater.inflate(R.layout.default_list_layout, container, false);
-		ListView listView = (ListView) rootView.findViewById(android.R.id.list);
 		if (savedInstanceState == null) {
-			itemsAdapter = new ItemListAdapter(getActivity());
-			itemsAdapter.setOnEditItemRequestListener(this);
-			itemsAdapter.setOnDeleteItemRequestListener(this);
+			ListView listView = (ListView) rootView.findViewById(android.R.id.list);
+			mItemsAdapter = new ItemListAdapter(getActivity());
+			mItemsAdapter.setOnSelectionIDRetrievedListener(this);
+			listView.setAdapter(mItemsAdapter);
+			listView.setOnItemClickListener(this);
 		}
-		listView.setAdapter(itemsAdapter);
-		listView.setOnItemClickListener(this);
 		return rootView;
 	}
 
@@ -85,7 +91,7 @@ public class ItemsFragment extends Fragment
 
 		String itemSortOrder = ItemEntry.TABLE_NAME + "." + ItemEntry.COLUMN_NAME + " ASC";
 		Uri itemUri = ItemEntry.buildItemsInCategoryUri(mCategoryID, true);
-		String[] itemProjection = ItemListAdapter.S_ITEMS_PROJECTION;
+		String[] itemProjection = ItemListAdapter.ITEMS_PROJECTION;
 
 		long preferredCurrencyID = Preference.getPreferredCurrencyID(getActivity());
 		Uri currencyUri = CurrencyEntry.buildCurrencyUri(preferredCurrencyID);
@@ -99,7 +105,7 @@ public class ItemsFragment extends Fragment
 		mContentLoader.setOnLoadFinishedListener(this);
 
 		mCurrencyLoaderID = mContentLoader.loadContent(currencyUri, currencyProjection, null);
-		mContentLoader.loadContent(itemUri, itemsAdapter, itemProjection, itemSortOrder);
+		mItemsLoaderID = mContentLoader.loadContent(itemUri, mItemsAdapter, itemProjection, itemSortOrder);
 
 		super.onActivityCreated(savedInstanceState);
 	}
@@ -107,45 +113,25 @@ public class ItemsFragment extends Fragment
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-		if (position == itemsAdapter.getSelectedPosition()) {
-			itemsAdapter.setSelectedPosition(-1);
+		if (position == mItemsAdapter.getSelectedPosition()) {
+			mItemsAdapter.setSelectedPosition(-1);
+			mOnItemSelectedCallback.onRequestDepopulateActions();
 		} else {
-			itemsAdapter.setSelectedPosition(position);
+			mItemsAdapter.setSelectedPosition(position);
 		}
+
 		//  TODO figure out how to use the following instead of re-querying the db:
-//		itemsAdapter.getView(position, null, parent);
+//		mItemsAdapter.getView(position, null, parent);
 		//  passing null (instead of view) to ensure that newView() is called in order
 		//  to re-inflate the view with the new layout.
 		//  tried it debugged it, logged it -> goes through all expected method calls but
 		//  does not update the actual view, Bummer!
-		itemsAdapter.notifyDataSetChanged();
+		mItemsAdapter.notifyDataSetChanged();
 	}
 
 	@Override
-	public void onEditItemRequested(long itemID) {
-
-		Intent editItemActivityIntent = new Intent(getActivity(), EditItemActivity.class);
-		editItemActivityIntent.putExtra(EditItemActivity.EXTRA_String_CATEGORY_NAME, mCategoryName);
-		editItemActivityIntent.putExtra(EditItemActivity.EXTRA_long_ITEM_ID, itemID);
-		editItemActivityIntent.putExtra(EditItemActivity.EXTRA_Class_CALLING_ACTIVITY, getActivity().getClass());
-		getActivity().startActivity(editItemActivityIntent);
-	}
-
-	@Override
-	public void onDeleteItemRequested(long itemID, String itemName) {
-		String whereClause = ItemEntry._ID + " = ?";
-		String[] whereArgs = new String[] {String.valueOf(itemID)};
-		ContentResolver contentResolver = getActivity().getContentResolver();
-		int count = contentResolver.delete(ItemEntry.CONTENT_URI, whereClause, whereArgs);
-		//  TODO do not delete immediately, archive and allow undo
-		if (count==0) {
-			UI.showToast(getActivity(), getString(R.string.error_toast_db_delete_fail));
-		} else if (count>1) {
-			UI.showToast(getActivity(), getString(R.string.error_toast_db_potential_data_corruption));
-		} else {
-			String successfulMessage = getString(R.string.toast_successful_delete);
-			UI.showToast(getActivity(), String.format(successfulMessage, itemName));
-		}
+	public void onSelectionRetrieved(long itemID, String name) {
+		mOnItemSelectedCallback.onRequestPopulateActions(itemID, name);
 	}
 
 	@Override
@@ -165,6 +151,7 @@ public class ItemsFragment extends Fragment
 			}
 			else {
 				Log.e(LOG_TAG, "No currencies found, not even default; count=" + cursor.getCount());
+				UI.showToast(getActivity(), getString(R.string.error_toast_fetch_preferred_currency_fail));
 				currency = new Currency(
 						CurrencyEntry.DEFAULT_CODE,
 						CurrencyEntry.DEFAULT_SYMBOL,
@@ -172,7 +159,15 @@ public class ItemsFragment extends Fragment
 						CurrencyEntry.DEFAULT_COUNTRY
 					);
 			}
-			itemsAdapter.setCurrency(currency);
+			mItemsAdapter.setCurrency(currency);
+			if (mIsItemsLoaded) {
+				Log.i(LOG_TAG, "Items List loaded before currency, reloading...");
+				mItemsAdapter.notifyDataSetChanged();
+			}
+		}
+		else if (id == mItemsLoaderID) {
+			mIsItemsLoaded = true;
 		}
 	}
+
 }

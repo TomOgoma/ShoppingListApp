@@ -294,16 +294,7 @@ public class ShoppingListProvider extends ContentProvider {
 
 	private Cursor getItems(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
-		SQLiteQueryBuilder queryBuilder;
-
-		if (ItemEntry.isToInnerJoinCurrency(uri)) {
-			queryBuilder =sITEM_CURRENCY_TABLES;
-		} else {
-			queryBuilder = new SQLiteQueryBuilder();
-			queryBuilder.setTables(ItemEntry.TABLE_NAME);
-		}
-
-		queryBuilder.setDistinct(ItemEntry.isToSelectDistinct(uri));
+		SQLiteQueryBuilder queryBuilder = prepareItemFetchQueryBuilder(uri);
 
 		String categoryID = ItemEntry.getCategoryIDFromUri(uri);
 		if (categoryID == null || categoryID.isEmpty()) {
@@ -323,7 +314,9 @@ public class ShoppingListProvider extends ContentProvider {
 
 	private Cursor getItem(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
-		String idSelection = ItemEntry._ID + " = ?";
+		SQLiteQueryBuilder queryBuilder = prepareItemFetchQueryBuilder(uri);
+
+		String idSelection = ItemEntry.TABLE_NAME + "." + ItemEntry._ID + " = ?";
 
 		if (selection == null || selection.isEmpty()) {
 
@@ -338,8 +331,8 @@ public class ShoppingListProvider extends ContentProvider {
 			selectionArgs[originalArgsLength] = ItemEntry.getItemIDFromUri(uri);
 		}
 
-		return dbHelper.getReadableDatabase().query(
-				ItemEntry.TABLE_NAME,
+		return queryBuilder.query(
+				dbHelper.getReadableDatabase(),
 				projection,
 				selection,
 				selectionArgs,
@@ -347,6 +340,21 @@ public class ShoppingListProvider extends ContentProvider {
 				null,
 				sortOrder
 			);
+	}
+
+	private SQLiteQueryBuilder prepareItemFetchQueryBuilder(Uri uri) {
+
+		SQLiteQueryBuilder queryBuilder;
+
+		if (ItemEntry.isToInnerJoinCurrency(uri)) {
+			queryBuilder =sITEM_CURRENCY_TABLES;
+		} else {
+			queryBuilder = new SQLiteQueryBuilder();
+			queryBuilder.setTables(ItemEntry.TABLE_NAME);
+		}
+
+		queryBuilder.setDistinct(ItemEntry.isToSelectDistinct(uri));
+		return queryBuilder;
 	}
 
 	private void addCurrencyIDToItemValues(ContentValues values) {

@@ -17,29 +17,63 @@ import com.tomogoma.shoppinglistapp.data.ContentLoader;
 import com.tomogoma.shoppinglistapp.data.ContentLoader.OnLoadFinishedListener;
 import com.tomogoma.shoppinglistapp.data.DBUpdateHelper;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
+import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.data.Item;
+import com.tomogoma.shoppinglistapp.items.list.ListingActivity;
 import com.tomogoma.shoppinglistapp.items.manipulate.ManipulateItemFragment;
+import com.tomogoma.shoppinglistapp.util.Formatter;
+import com.tomogoma.shoppinglistapp.util.Preference;
 import com.tomogoma.shoppinglistapp.util.UI;
 
 public class EditItemFragment extends ManipulateItemFragment {
-
-	public static final String EXTRA_long_ITEM_ID = EditItemFragment.class.getName() + "_extra.category.id";
 
 	private static final String LOG_TAG = EditItemFragment.class.getSimpleName();
 
 	private long mItemID = -1;
 	private long mItemLoaderID = -1;
+	private long mPreferredCurrencyLoaderId = -1;
+	private boolean mIsCursorsLoaded;
 	private ContentLoader mLoader;
 	private View mRootView;
+	private Cursor mItemCursor;
+	private Cursor mPreferredCurrencyCursor;
 
 	private class OnItemLoadFinishedListener implements OnLoadFinishedListener {
 
+		private boolean isOtherLoaded;
+
 		@Override
 		public void onLoadFinished(int id) {
+
 			if (mItemLoaderID == id) {
-				populateFields(mLoader.getLoadedCursor(id));
+				mItemCursor = mLoader.getLoadedCursor(id);
+				populateFieldsWhenReady();
 			}
+			else if (mPreferredCurrencyLoaderId == id) {
+				mPreferredCurrencyCursor = mLoader.getLoadedCursor(id);
+				populateFieldsWhenReady();
+			}
+		}
+
+		private synchronized void populateFieldsWhenReady() {
+			if (isOtherLoaded) {
+
+				if (mIsAutoTextViewAdaptersLoaded) {
+					populateFields();
+				} else {
+					mIsCursorsLoaded = true;
+				}
+			} else {
+				isOtherLoaded = true;
+			}
+		}
+	}
+
+	@Override
+	protected void onSuperAdaptersLoaded() {
+		if (mIsCursorsLoaded) {
+			populateFields();
 		}
 	}
 
@@ -48,7 +82,7 @@ public class EditItemFragment extends ManipulateItemFragment {
 		super.onCreate(savedInstanceState);
 		Bundle arguments = getArguments();
 		if (arguments != null) {
-			mItemID = arguments.getLong(EXTRA_long_ITEM_ID, -1);
+			mItemID = arguments.getLong(ListingActivity.EXTRA_long_ITEM_ID, -1);
 		}
 	}
 
@@ -67,10 +101,23 @@ public class EditItemFragment extends ManipulateItemFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 
-		Uri itemUri = ItemEntry.buildItemUri(mItemID);
+		long preferredCurrencyID = Preference.getPreferredCurrencyID(getActivity());
+		Uri currencyUri = CurrencyEntry.buildCurrencyUri(preferredCurrencyID);
+		String[] currencyProjection = new String[] {
+				CurrencyEntry.COLUMN_CODE,
+				CurrencyEntry.COLUMN_LAST_CONVERSION
+			};
+
+		Uri itemUri = ItemEntry.buildItemCurrencyUri(mItemID);
+		String[] itemProjection = new String[] {
+				ItemEntry.TABLE_NAME + ".*",
+				CurrencyEntry.COLUMN_CODE,
+				CurrencyEntry.COLUMN_LAST_CONVERSION
+			};
 		mLoader = new ContentLoader(getActivity(), this);
 		mLoader.setOnLoadFinishedListener(new OnItemLoadFinishedListener());
-		mItemLoaderID = mLoader.loadContent(itemUri, null, null);
+		mItemLoaderID = mLoader.loadContent(itemUri, itemProjection, null);
+		mPreferredCurrencyLoaderId = mLoader.loadContent(currencyUri, currencyProjection, null);
 		super.onActivityCreated(savedInstanceState);
 	}
 
@@ -79,7 +126,7 @@ public class EditItemFragment extends ManipulateItemFragment {
 
 		super.onViewStateRestored(savedInstanceState);
 		if (savedInstanceState != null) {
-			processDependentViewVisibility(etActualMeasUnit);
+			processDependentViewVisibility(mEtActualMeasUnit);
 		}
 	}
 
@@ -90,13 +137,13 @@ public class EditItemFragment extends ManipulateItemFragment {
 
 		if (itemName.isEmpty()) {
 			UI.showKeyboardToast(getActivity(), getString(R.string.error_toast_missing_item_name));
-			autoTvItemName.setError(getString(R.string.error_inputViewErr_missing_item));
+			mAutoTvItemName.setError(getString(R.string.error_inputViewErr_missing_item));
 			return null;
 		}
 
 		int updateCount = DBUpdateHelper.updateItem(
 				getActivity(),
-				new Item(categoryID, mItemID, mLastsForUnit, autoTvItemName, etUnitPrice, etQuantity, etLastsFor, etActualMeasUnit, etDesc)
+				new Item(categoryID, mItemID, mLastsForUnit, mAutoTvItemName, mEtUnitPrice, mEtQuantity, mEtLastsFor, mEtActualMeasUnit, mEtDesc)
 		);
 
 		if (updateCount <0) {
@@ -127,26 +174,60 @@ public class EditItemFragment extends ManipulateItemFragment {
 		return packageResultIntent(categoryID, categoryName);
 	}
 
-	private void populateFields(Cursor itemCursor) {
+	private void populateFields() {
 
-		itemCursor.moveToFirst();
+		Double unitPrice, boundConversion, preferredConversion, price;
+		String boundCode, lastsForUnit, preferredCode, itemName, itemQuantity,
+			measUnit, lastsFor, description;
+		try {
+
+			mItemCursor.moveToFirst();
+			int colIndex = mItemCursor.getColumnIndex(ItemEntry.COLUMN_PRICE);
+				unitPrice = mItemCursor.getDouble(colIndex);
+			colIndex = mItemCursor.getColumnIndex(ItemEntry.COLUMN_NAME);
+				itemName = mItemCursor.getString(colIndex);
+			colIndex = mItemCursor.getColumnIndex(ItemEntry.COLUMN_QUANTITY);
+				itemQuantity = mItemCursor.getString(colIndex);
+			colIndex = mItemCursor.getColumnIndex(ItemEntry.COLUMN_MEAS_UNIT);
+				measUnit = mItemCursor.getString(colIndex);
+			colIndex = mItemCursor.getColumnIndex(ItemEntry.COLUMN_LASTS_FOR_UNIT);
+				lastsFor = mItemCursor.getString(colIndex);
+			colIndex = mItemCursor.getColumnIndex(ItemEntry.COLUMN_DESC);
+				description = mItemCursor.getString(colIndex);
+			colIndex = mItemCursor.getColumnIndex(ItemEntry.COLUMN_LASTS_FOR);
+				lastsForUnit = mItemCursor.getString(colIndex);
+
+			colIndex = mItemCursor.getColumnIndex(CurrencyEntry.COLUMN_CODE);
+				boundCode = mItemCursor.getString(colIndex);
+			colIndex = mItemCursor.getColumnIndex(CurrencyEntry.COLUMN_LAST_CONVERSION);
+				boundConversion = mItemCursor.getDouble(colIndex);
+
+			mPreferredCurrencyCursor.moveToFirst();
+			colIndex = mPreferredCurrencyCursor.getColumnIndex(CurrencyEntry.COLUMN_CODE);
+				preferredCode = mPreferredCurrencyCursor.getString(colIndex);
+			colIndex = mPreferredCurrencyCursor.getColumnIndex(CurrencyEntry.COLUMN_LAST_CONVERSION);
+				preferredConversion = mPreferredCurrencyCursor.getDouble(colIndex);
+		} finally {
+			mItemCursor.close();
+			mPreferredCurrencyCursor.close();
+		}
+
 		RadioButton rgLastsDays = (RadioButton) mRootView.findViewById(R.id.lastsDays);
 		RadioButton rgLastsWeeks = (RadioButton) mRootView.findViewById(R.id.lastsWeeks);
 		RadioButton rgLastsMonths = (RadioButton) mRootView.findViewById(R.id.lastsMonths);
 		RadioButton rgLastsYears = (RadioButton) mRootView.findViewById(R.id.lastsYears);
 
-		autoTvItemName.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_NAME)));
-		etUnitPrice.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_PRICE)));
-		etQuantity.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_QUANTITY)));
-		etActualMeasUnit.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_MEAS_UNIT)));
-		etLastsFor.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_LASTS_FOR_UNIT)));
-		etDesc.setText(itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_DESC)));
+		price = Formatter.convertPrice(unitPrice, boundCode, boundConversion, preferredCode, preferredConversion);
 
-		processDependentViewVisibility(etActualMeasUnit);
+		mAutoTvItemName.setText(itemName);
+		mEtUnitPrice.setText(String.valueOf(price));
+		mEtQuantity.setText(itemQuantity);
+		mEtActualMeasUnit.setText(measUnit);
+		mEtLastsFor.setText(lastsFor);
+		mEtDesc.setText(description);
 
-		UI.hideKeyboard(getActivity(), autoTvCategoryName);
+		processDependentViewVisibility(mEtActualMeasUnit);
 
-		String lastsForUnit = itemCursor.getString(itemCursor.getColumnIndex(ItemEntry.COLUMN_LASTS_FOR));
 		if (lastsForUnit.equals(getString(R.string.lasts_day_text))) {
 			rgLastsDays.setChecked(true);
 		} else if  (lastsForUnit.equals(getString(R.string.lasts_week_text))) {
@@ -156,6 +237,8 @@ public class EditItemFragment extends ManipulateItemFragment {
 		} else if  (lastsForUnit.equals(getString(R.string.lasts_year_text))) {
 			rgLastsYears.setChecked(true);
 		}
+
+		mEtQuantity.requestFocus();
 	}
 
 }

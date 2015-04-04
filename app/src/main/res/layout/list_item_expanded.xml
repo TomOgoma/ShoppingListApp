@@ -7,7 +7,7 @@
 	android:layout_height="wrap_content"
 	android:gravity="center_vertical"
 	android:minHeight="?android:attr/listPreferredItemHeight"
-	android:background="@drawable/touch_selector"
+	android:background="@color/grey_light"
 	android:padding="@dimen/view_margin_large">
 
 	<TextView
@@ -17,46 +17,11 @@
 		android:layout_alignParentLeft="true"
 		android:layout_alignParentStart="true"
 		android:layout_alignParentTop="true"
-		android:layout_toStartOf="@+id/deleteItem"
-		android:layout_toLeftOf="@+id/deleteItem"
-		android:gravity="center_vertical"
-		tools:text="Toothpaste"/>
-
-	<ImageView
-		android:id="@+id/deleteItem"
-		android:layout_width="42dp"
-		android:layout_height="@dimen/text_view_height"
-		android:paddingTop="6dp"
-		android:paddingBottom="6dp"
-		android:paddingLeft="12dp"
-		android:paddingStart="12dp"
-		android:paddingRight="5dp"
-		android:paddingEnd="5dp"
-		android:layout_marginRight="1dp"
-		android:layout_marginEnd="1dp"
-		android:layout_alignParentTop="true"
-		android:layout_toLeftOf="@+id/editItem"
-		android:layout_toStartOf="@+id/editItem"
-		android:layout_alignTop="@+id/title"
-		android:src="@drawable/ic_delete"/>
-
-	<ImageView
-		android:id="@+id/editItem"
-		android:layout_width="42dp"
-		android:layout_height="@dimen/text_view_height"
-		android:paddingTop="6dp"
-		android:paddingBottom="6dp"
-		android:paddingLeft="5dp"
-		android:paddingStart="5dp"
-		android:layout_marginLeft="1dp"
-		android:layout_marginStart="1dp"
-		android:paddingRight="12dp"
-		android:paddingEnd="12dp"
-		android:layout_alignParentTop="true"
-		android:layout_toLeftOf="@+id/shoppingListAdd"
 		android:layout_toStartOf="@+id/shoppingListAdd"
-		android:layout_alignTop="@+id/title"
-		android:src="@drawable/ic_edit"/>
+		android:layout_toLeftOf="@+id/shoppingListAdd"
+		android:gravity="center_vertical"
+		tools:text="Toothpaste"
+		android:textStyle="bold"/>
 
 	<CheckBox
 		android:id="@+id/shoppingListAdd"
@@ -69,19 +34,11 @@
 		tools:visibility="visible"
 		android:focusable="false"/>
 
-	<View
-		android:id="@+id/headerMargin"
-		android:layout_width="fill_parent"
-		android:layout_height="1dp"
-		android:layout_below="@+id/editItem"
-		android:layout_marginBottom="@dimen/view_margin_medium"
-		android:background="#e1dbdb" />
-
 	<TextView
 		android:id="@+id/versionName"
 		android:layout_width="wrap_content"
 		android:layout_height="@dimen/text_view_height"
-		android:layout_below="@+id/headerMargin"
+		android:layout_below="@+id/title"
 		android:visibility="gone"
 		tools:text="(Colgate Herbal mint fresh)"
 		tools:visibility="visible"/>
@@ -90,7 +47,7 @@
 		android:id="@+id/unitPrice"
 		android:layout_width="wrap_content"
 		android:layout_height="23dp"
-		android:layout_below="@+id/headerMargin"
+		android:layout_below="@+id/title"
 		android:layout_alignParentRight="true"
 		android:layout_alignParentEnd="true"
 		android:gravity="right"
