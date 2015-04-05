@@ -52,6 +52,8 @@
 	<string name="lasts_week_text">Weeks</string>
 	<string name="lasts_month_text">Months</string>
 	<string name="lasts_year_text">Years</string>
+	<!--Placeholder text for an empty list-->
+	<string name="advice_empty_list">No items yet, click on the \"Add\" action to add more</string>
 
 	<!--Input View error messages-->
 	<string name="error_inputViewErr_missing_item">Probably forgot the item\'s name?</string>

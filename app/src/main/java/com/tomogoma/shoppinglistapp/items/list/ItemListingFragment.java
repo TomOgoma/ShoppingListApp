@@ -10,12 +10,10 @@ import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.tomogoma.shoppinglistapp.R;
@@ -116,15 +114,14 @@ public class ItemListingFragment extends ListFragment
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-		View rootView = inflater.inflate(R.layout.default_list_layout, container, false);
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
 		if (savedInstanceState == null) {
 			mItemsAdapter = new ItemListAdapter(getActivity());
 			mItemsAdapter.setOnSelectionRetrievedListener(this);
 			setListAdapter(mItemsAdapter);
+			setEmptyText(getString(R.string.advice_empty_list));
 		}
-		return rootView;
 	}
 
 	@Override
@@ -151,6 +148,14 @@ public class ItemListingFragment extends ListFragment
 		mItemsLoaderID = mContentLoader.loadContent(itemUri, mItemsAdapter, itemProjection, itemSortOrder);
 
 		super.onActivityCreated(savedInstanceState);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (!mIsItemsLoaded) {
+			setListShown(false);
+		}
 	}
 
 	@Override
@@ -218,6 +223,7 @@ public class ItemListingFragment extends ListFragment
 		}
 		else if (id == mItemsLoaderID) {
 			mIsItemsLoaded = true;
+			setListShown(true);
 		}
 	}
 

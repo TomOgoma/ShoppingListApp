@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter.ViewBinder;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.tomogoma.shoppinglistapp.R;
@@ -41,6 +39,7 @@ public class CategoryListingFragment extends ListFragment {
 	private long mCurrCategoryID;
 	private int mSelectPosition;
 	private boolean mIsOnlyPane;
+	private boolean mIsItemsLoaded;
 
 	public interface OnCategorySelectedListener {
 		public void onCategorySelected(long categoryID, String categoryName);
@@ -71,12 +70,11 @@ public class CategoryListingFragment extends ListFragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
 		if (savedInstanceState == null) {
 			initializeViews();
 		}
-		return inflater.inflate(R.layout.default_list_layout, container, false);
 	}
 
 	@Override
@@ -88,6 +86,8 @@ public class CategoryListingFragment extends ListFragment {
 		contentLoader.setOnLoadFinishedListener(new OnLoadFinishedListener() {
 			@Override
 			public void onLoadFinished(int id) {
+				mIsItemsLoaded = true;
+				setListShown(true);
 				if (!mIsOnlyPane && mSelectPosition != ListView.INVALID_POSITION) {
 					getListView().post(new Runnable() {
 						@Override
@@ -108,6 +108,9 @@ public class CategoryListingFragment extends ListFragment {
 	public void onResume() {
 		super.onResume();
 
+		if (!mIsItemsLoaded) {
+			setListShown(false);
+		}
 		// Cannot perform this in onLoad finished, so we come do it here
 		if (!mIsOnlyPane && mSelectPosition != ListView.INVALID_POSITION) {
 			ListView list = getListView();
