@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.tomogoma.shoppinglistapp.R;
@@ -27,8 +25,8 @@ import com.tomogoma.shoppinglistapp.util.UI;
 /**
  * Created by ogoma on 01/03/15.
  */
-public class ItemListingFragment extends Fragment
-		implements OnItemClickListener, OnLoadFinishedListener, OnSelectionRetrievedListener {
+public class ItemListingFragment extends ListFragment
+		implements OnLoadFinishedListener, OnSelectionRetrievedListener {
 
 	private static final String LOG_TAG = ItemListingFragment.class.getSimpleName();
 
@@ -60,6 +58,7 @@ public class ItemListingFragment extends Fragment
 
 		Bundle arguments = getArguments();
 		if (arguments == null) {
+			Log.e(LOG_TAG, "Received null arguments; falling back to defaults");
 			mCategoryID = CategoryEntry.DEFAULT_ID;
 			mCategoryName = CategoryEntry.DEFAULT_NAME;
 		} else {
@@ -75,11 +74,9 @@ public class ItemListingFragment extends Fragment
 
 		View rootView = inflater.inflate(R.layout.default_list_layout, container, false);
 		if (savedInstanceState == null) {
-			ListView listView = (ListView) rootView.findViewById(android.R.id.list);
 			mItemsAdapter = new ItemListAdapter(getActivity());
 			mItemsAdapter.setOnSelectionIDRetrievedListener(this);
-			listView.setAdapter(mItemsAdapter);
-			listView.setOnItemClickListener(this);
+			setListAdapter(mItemsAdapter);
 		}
 		return rootView;
 	}
@@ -111,7 +108,7 @@ public class ItemListingFragment extends Fragment
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	public void onListItemClick(ListView l, View view, int position, long id) {
 
 		if (position == mItemsAdapter.getSelectedPosition()) {
 			mItemsAdapter.setSelectedPosition(-1);

@@ -8,6 +8,8 @@ import com.tomogoma.shoppinglistapp.items.manipulate.ManipulateItemActivity;
 
 public class ItemListingActivity extends ListingActivity {
 
+	//private static final String LOG_TAG = ItemListingActivity.class.getName();
+
 	@Override
 	protected Class<?> getParentActivity() {
 		return CategoryListingActivity.class;

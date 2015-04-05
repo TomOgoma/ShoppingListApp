@@ -306,7 +306,7 @@ public class ItemListAdapter extends CursorAdapter {
 	}
 
 	private void fallBackToDefaultCurrency() {
-		Log.e(LOG_TAG, "Failed to load preferred currency");
+		Log.w(LOG_TAG, "Failed to load preferred currency; falling back to default");
 		mCurrency = new Currency(
 				CurrencyEntry.DEFAULT_CODE,
 				CurrencyEntry.DEFAULT_SYMBOL,

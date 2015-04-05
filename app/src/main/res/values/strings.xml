@@ -12,6 +12,10 @@
 	<string name="action_add">Add</string>
 	<string name="action_done">Done</string>
 
+	<!--Context Menu Actions-->
+	<string name="action_edit">Edit</string>
+	<string name="action_delete">Delete</string>
+
 	<!--Sync Adapter-->
 	<string name="sync_account_type">shoppinglistapp.tomogoma.com</string>
 	<string name="content_authority">com.tomogoma.shoppinglistapp</string>

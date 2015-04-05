@@ -3,7 +3,9 @@ package com.tomogoma.shoppinglistapp.items.list;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.tomogoma.shoppinglistapp.R;
@@ -33,14 +35,53 @@ public abstract class ListingActivity extends ShoppingListAppActivity
 	protected String mCategoryName = CategoryEntry.DEFAULT_NAME;
 	protected Bundle mArguments;
 
+	private static final String LOG_TAG = ListingActivity.class.getName();
 	private static final int ADD_ITEM_REQ_CODE = 5034;
 	private static final int EDIT_MENU_ITEM_ID = 5023;
 	private static final int DELETE_MENU_ITEM_ID = 5024;
 
+	private ActionMode mActionMode;
 	private Menu mMenu;
 	private String mActionItemName;
 	private long mActionItemID;
-	private boolean mIsActionsPopulated;
+
+	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			MenuInflater inflater = mode.getMenuInflater();
+			inflater.inflate(R.menu.single_item_context, menu);
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			return false;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			switch (item.getItemId()) {
+				case R.id.action_edit: {
+					removeSelectionIcons();
+					openEditActivity();
+					return true;
+				}
+				case R.id.action_delete: {
+					removeSelectionIcons();
+					performDelete();
+					return true;
+				}
+				default:
+					return false;
+			}
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mActionMode = null;
+		}
+	};
 
 	protected abstract void showItems(Bundle arguments);
 
@@ -98,16 +139,6 @@ public abstract class ListingActivity extends ShoppingListAppActivity
 				startAddItemActivityForResult(addItemIntent);
 				return true;
 			}
-			case EDIT_MENU_ITEM_ID: {
-				removeSelectionIcons();
-				openEditActivity();
-				return true;
-			}
-			case DELETE_MENU_ITEM_ID: {
-				removeSelectionIcons();
-				performDelete();
-				return true;
-			}
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -118,20 +149,14 @@ public abstract class ListingActivity extends ShoppingListAppActivity
 		mActionItemID = itemID;
 		mActionItemName = itemName;
 
-		if (!mIsActionsPopulated) {
-			mMenu.add(Menu.NONE, EDIT_MENU_ITEM_ID, Menu.NONE, "Edit")
-			     .setIcon(R.drawable.ic_edit)
-			     .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-			mMenu.add(Menu.NONE, DELETE_MENU_ITEM_ID, Menu.NONE, "Delete")
-			     .setIcon(R.drawable.ic_delete)
-			     .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-			mIsActionsPopulated = true;
+		if (mActionMode == null) {
+			mActionMode = startSupportActionMode(mActionModeCallback);
 		}
 	}
 
 	@Override
 	public void onRequestDepopulateActions() {
-		removeSelectionIcons();
+		mActionMode.finish();
 	}
 
 	/**
@@ -208,6 +233,5 @@ public abstract class ListingActivity extends ShoppingListAppActivity
 	private void removeSelectionIcons() {
 		mMenu.removeItem(EDIT_MENU_ITEM_ID);
 		mMenu.removeItem(DELETE_MENU_ITEM_ID);
-		mIsActionsPopulated = false;
 	}
 }
