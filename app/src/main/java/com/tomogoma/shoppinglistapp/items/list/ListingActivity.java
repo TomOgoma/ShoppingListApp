@@ -1,25 +1,17 @@
 package com.tomogoma.shoppinglistapp.items.list;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.view.ActionMode;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.ShoppingListAppActivity;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
-import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
-import com.tomogoma.shoppinglistapp.items.list.ItemListingFragment.OnRequestPopulateActionsListener;
 import com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity;
-import com.tomogoma.shoppinglistapp.items.manipulate.edit.EditItemActivity;
-import com.tomogoma.shoppinglistapp.util.UI;
 
 
-public abstract class ListingActivity extends ShoppingListAppActivity
-		implements OnRequestPopulateActionsListener {
+public abstract class ListingActivity extends ShoppingListAppActivity {
 
 	public static final String EXTRA_Bundle_CATEGORY_DETAILS =
 			ListingActivity.class.getName() + "_extra.category.details";
@@ -37,51 +29,6 @@ public abstract class ListingActivity extends ShoppingListAppActivity
 
 	private static final String LOG_TAG = ListingActivity.class.getName();
 	private static final int ADD_ITEM_REQ_CODE = 5034;
-	private static final int EDIT_MENU_ITEM_ID = 5023;
-	private static final int DELETE_MENU_ITEM_ID = 5024;
-
-	private ActionMode mActionMode;
-	private Menu mMenu;
-	private String mActionItemName;
-	private long mActionItemID;
-
-	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-
-		@Override
-		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-			MenuInflater inflater = mode.getMenuInflater();
-			inflater.inflate(R.menu.single_item_context, menu);
-			return true;
-		}
-
-		@Override
-		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-			return false;
-		}
-
-		@Override
-		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-			switch (item.getItemId()) {
-				case R.id.action_edit: {
-					removeSelectionIcons();
-					openEditActivity();
-					return true;
-				}
-				case R.id.action_delete: {
-					removeSelectionIcons();
-					performDelete();
-					return true;
-				}
-				default:
-					return false;
-			}
-		}
-
-		@Override
-		public void onDestroyActionMode(ActionMode mode) {
-			mActionMode = null;
-		}
-	};
 
 	protected abstract void showItems(Bundle arguments);
 
@@ -122,7 +69,6 @@ public abstract class ListingActivity extends ShoppingListAppActivity
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		getMenuInflater().inflate(R.menu.items, menu);
-		mMenu = menu;
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -141,22 +87,6 @@ public abstract class ListingActivity extends ShoppingListAppActivity
 			}
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public void onRequestPopulateActions(long itemID, String itemName) {
-
-		mActionItemID = itemID;
-		mActionItemName = itemName;
-
-		if (mActionMode == null) {
-			mActionMode = startSupportActionMode(mActionModeCallback);
-		}
-	}
-
-	@Override
-	public void onRequestDepopulateActions() {
-		mActionMode.finish();
 	}
 
 	/**
@@ -199,39 +129,5 @@ public abstract class ListingActivity extends ShoppingListAppActivity
 			}
 		}
 		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-	private void openEditActivity() {
-
-		Bundle args = new Bundle();
-		args.putString(ListingActivity.EXTRA_String_CATEGORY_NAME, mCategoryName);
-		args.putLong(ListingActivity.EXTRA_long_CATEGORY_ID, mCategoryID);
-		args.putSerializable(EditItemActivity.EXTRA_Class_CALLING_ACTIVITY, getClass());
-
-		Intent editItemActivityIntent = new Intent(this, EditItemActivity.class);
-		editItemActivityIntent.putExtra(ListingActivity.EXTRA_long_ITEM_ID, mActionItemID);
-		editItemActivityIntent.putExtra(ListingActivity.EXTRA_Bundle_CATEGORY_DETAILS, args);
-		startActivity(editItemActivityIntent);
-	}
-
-	private void performDelete() {
-		String whereClause = ItemEntry._ID + " = ?";
-		String[] whereArgs = new String[] {String.valueOf(mActionItemID)};
-		ContentResolver contentResolver = getContentResolver();
-		int count = contentResolver.delete(ItemEntry.CONTENT_URI, whereClause, whereArgs);
-		//  TODO do not delete immediately, archive and allow undo
-		if (count==0) {
-			UI.showToast(this, getString(R.string.error_toast_db_delete_fail));
-		} else if (count>1) {
-			UI.showToast(this, getString(R.string.error_toast_db_potential_data_corruption));
-		} else {
-			String successfulMessage = getString(R.string.toast_successful_delete);
-			UI.showToast(this, String.format(successfulMessage, mActionItemName));
-		}
-	}
-
-	private void removeSelectionIcons() {
-		mMenu.removeItem(EDIT_MENU_ITEM_ID);
-		mMenu.removeItem(DELETE_MENU_ITEM_ID);
 	}
 }

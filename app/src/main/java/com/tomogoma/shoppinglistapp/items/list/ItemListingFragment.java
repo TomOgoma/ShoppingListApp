@@ -1,12 +1,19 @@
 package com.tomogoma.shoppinglistapp.items.list;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -19,6 +26,7 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.items.list.ItemListAdapter.OnSelectionRetrievedListener;
+import com.tomogoma.shoppinglistapp.items.manipulate.edit.EditItemActivity;
 import com.tomogoma.shoppinglistapp.util.Preference;
 import com.tomogoma.shoppinglistapp.util.UI;
 
@@ -30,7 +38,6 @@ public class ItemListingFragment extends ListFragment
 
 	private static final String LOG_TAG = ItemListingFragment.class.getSimpleName();
 
-	private OnRequestPopulateActionsListener mOnItemSelectedCallback;
 	private ItemListAdapter mItemsAdapter;
 	private String mCategoryName;
 	private ContentLoader mContentLoader;
@@ -39,15 +46,54 @@ public class ItemListingFragment extends ListFragment
 	private int mItemsLoaderID;
 	private boolean mIsItemsLoaded;
 
-	public interface OnRequestPopulateActionsListener {
-		public void onRequestPopulateActions(long itemID, String itemName);
-		public void onRequestDepopulateActions();
-	}
+	private ActionBarActivity mActivity;
+	private ActionMode mActionMode;
+	private String mActionItemName;
+	private long mActionItemID;
+	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			MenuInflater inflater = mode.getMenuInflater();
+			inflater.inflate(R.menu.single_item_context, menu);
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			mode.setTitle(mActionItemName);
+			return true;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+
+			switch (item.getItemId()) {
+				case R.id.action_edit: {
+					mode.finish();
+					openEditActivity();
+					return true;
+				}
+				case R.id.action_delete: {
+					mode.finish();
+					performDelete();
+					return true;
+				}
+				default: return false;
+			}
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mActionMode = null;
+			updateSelection(-1);
+		}
+	};
 
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		mOnItemSelectedCallback = (OnRequestPopulateActionsListener) activity;
+		mActivity = (ActionBarActivity) activity;
 	}
 
 	@Override
@@ -75,7 +121,7 @@ public class ItemListingFragment extends ListFragment
 		View rootView = inflater.inflate(R.layout.default_list_layout, container, false);
 		if (savedInstanceState == null) {
 			mItemsAdapter = new ItemListAdapter(getActivity());
-			mItemsAdapter.setOnSelectionIDRetrievedListener(this);
+			mItemsAdapter.setOnSelectionRetrievedListener(this);
 			setListAdapter(mItemsAdapter);
 		}
 		return rootView;
@@ -108,27 +154,35 @@ public class ItemListingFragment extends ListFragment
 	}
 
 	@Override
+	public void onStop() {
+		if (mActionMode!=null) {
+			mActionMode.finish();
+		}
+		super.onStop();
+	}
+
+	@Override
 	public void onListItemClick(ListView l, View view, int position, long id) {
 
 		if (position == mItemsAdapter.getSelectedPosition()) {
-			mItemsAdapter.setSelectedPosition(-1);
-			mOnItemSelectedCallback.onRequestDepopulateActions();
+			if (mActionMode != null) {
+				mActionMode.finish();
+			}
 		} else {
-			mItemsAdapter.setSelectedPosition(position);
+			updateSelection(position);
 		}
-
-		//  TODO figure out how to use the following instead of re-querying the db:
-//		mItemsAdapter.getView(position, null, parent);
-		//  passing null (instead of view) to ensure that newView() is called in order
-		//  to re-inflate the view with the new layout.
-		//  tried it debugged it, logged it -> goes through all expected method calls but
-		//  does not update the actual view, Bummer!
-		mItemsAdapter.notifyDataSetChanged();
 	}
 
 	@Override
 	public void onSelectionRetrieved(long itemID, String name) {
-		mOnItemSelectedCallback.onRequestPopulateActions(itemID, name);
+
+		mActionItemID = itemID;
+		mActionItemName = name;
+
+		if (mActionMode == null) {
+			mActionMode = mActivity.startSupportActionMode(mActionModeCallback);
+		}
+		mActionMode.invalidate();
 	}
 
 	@Override
@@ -164,6 +218,47 @@ public class ItemListingFragment extends ListFragment
 		}
 		else if (id == mItemsLoaderID) {
 			mIsItemsLoaded = true;
+		}
+	}
+
+	private void updateSelection(int position) {
+
+		mItemsAdapter.setSelectedPosition(position);
+		//  TODO figure out how to use the following instead of re-querying the db:
+		//	mItemsAdapter.getView(position, null, parent);
+		//  passing null (instead of view) to ensure that newView() is called in order
+		//  to re-inflate the view with the new layout.
+		//  tried it debugged it, logged it -> goes through all expected method calls but
+		//  does not update the actual view, Bummer!
+		mItemsAdapter.notifyDataSetChanged();
+	}
+
+	private void openEditActivity() {
+
+		Bundle args = new Bundle();
+		args.putString(ListingActivity.EXTRA_String_CATEGORY_NAME, mCategoryName);
+		args.putLong(ListingActivity.EXTRA_long_CATEGORY_ID, mCategoryID);
+		args.putSerializable(EditItemActivity.EXTRA_Class_CALLING_ACTIVITY, getClass());
+
+		Intent editItemActivityIntent = new Intent(getActivity(), EditItemActivity.class);
+		editItemActivityIntent.putExtra(ListingActivity.EXTRA_long_ITEM_ID, mActionItemID);
+		editItemActivityIntent.putExtra(ListingActivity.EXTRA_Bundle_CATEGORY_DETAILS, args);
+		startActivity(editItemActivityIntent);
+	}
+
+	private void performDelete() {
+		String whereClause = ItemEntry._ID + " = ?";
+		String[] whereArgs = new String[] {String.valueOf(mActionItemID)};
+		ContentResolver contentResolver = getActivity().getContentResolver();
+		int count = contentResolver.delete(ItemEntry.CONTENT_URI, whereClause, whereArgs);
+		//  TODO do not delete immediately, archive and allow undo
+		if (count==0) {
+			UI.showToast(getActivity(), getActivity().getString(R.string.error_toast_db_delete_fail));
+		} else if (count>1) {
+			UI.showToast(getActivity(), getActivity().getString(R.string.error_toast_db_potential_data_corruption));
+		} else {
+			String successfulMessage = getString(R.string.toast_successful_delete);
+			UI.showToast(getActivity(), String.format(successfulMessage, mActionItemName));
 		}
 	}
 

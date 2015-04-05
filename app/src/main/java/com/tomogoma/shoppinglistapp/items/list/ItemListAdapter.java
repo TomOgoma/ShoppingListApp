@@ -197,7 +197,7 @@ public class ItemListAdapter extends CursorAdapter {
 		}
 	}
 
-	public void setOnSelectionIDRetrievedListener(OnSelectionRetrievedListener listener) {
+	public void setOnSelectionRetrievedListener(OnSelectionRetrievedListener listener) {
 		mOnSelectionRetrievedCallback = listener;
 	}
 
