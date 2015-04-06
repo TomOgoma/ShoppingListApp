@@ -60,16 +60,42 @@
 	<string name="error_inputViewErr_missing_category">Nice to have categories, isn\'t it?</string>
 
 	<!--Error Toast Messages-->
-	<string name="error_toast_http_fetch_currencies">Unable to get currencies list due to connectivity problems</string>
-	<string name="error_toast_fetch_currencies">Unable to get currencies list due to unexpected problems</string>
-	<string name="error_toast_fetch_preferred_currency_fail">Failed to load preferred currency, falling back to default</string>
-	<string name="error_toast_loading_data">An error occurred loading data, please try again</string>
-	<string name="error_toast_db_delete_fail">failed to delete the item, please try again</string>
-	<string name="error_toast_db_update_fail">failed to update the item: <xliff:g id="itemName">%s</xliff:g>, please try again</string>
-	<string name="error_toast_missing_item_name">Missing the item name</string>
-	<string name="error_toast_missing_item_or_category">Missing the item name or category name; must enter at least one</string>
-	<string name="error_toast_db_potential_data_corruption">Whoa! I may have screwed up, please check that your data is okay</string>
-	<string name="error_toast_item_exists"><xliff:g id="itemName">%s</xliff:g> already exists</string>
+	<string name="error_toast_http_fetch_currencies">
+		Unable to get currencies list due to connectivity problems
+	</string>
+	<string name="error_toast_fetch_currencies">
+		Unable to get currencies list due to unexpected problems
+	</string>
+	<string name="error_toast_fetch_preferred_currency_fail">
+		Failed to load preferred currency, falling back to default
+	</string>
+	<string name="error_toast_loading_data">
+		An error occurred loading data, please try again
+	</string>
+	<string name="error_toast_db_delete_fail">
+		failed to delete the item, please try again
+	</string>
+	<string name="error_toast_db_multi_delete_fail">
+		failed to delete the items, please try again
+	</string>
+	<string name="error_toast_db_update_fail">
+		failed to update the item: <xliff:g id="itemName">%s</xliff:g>, please try again
+	</string>
+	<string name="error_toast_missing_item_name">
+		Missing the item name
+	</string>
+	<string name="error_toast_missing_item_or_category">
+		Missing the item name or category name; must enter at least one
+	</string>
+	<string name="error_toast_db_potential_data_corruption">
+		Whoa! I may have screwed up, please check that your data is okay
+	</string>
+	<string name="error_toast_item_exists">
+		<xliff:g id="itemName">%s</xliff:g> already exists
+	</string>
+	<string name="error_toast_multi_delete_not_executed">
+		Whoops, looks like something went wrong parsing your selection, please try again
+	</string>
 
 	<!--Informative Toast Messages-->
 	<string name="toast_successful_delete">Successfully deleted <xliff:g id="itemName">%s</xliff:g></string>

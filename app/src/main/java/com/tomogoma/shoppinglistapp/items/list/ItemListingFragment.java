@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.ListView;
 
 import com.tomogoma.shoppinglistapp.R;
@@ -27,6 +28,9 @@ import com.tomogoma.shoppinglistapp.items.list.ItemListAdapter.OnSelectionRetrie
 import com.tomogoma.shoppinglistapp.items.manipulate.edit.EditItemActivity;
 import com.tomogoma.shoppinglistapp.util.Preference;
 import com.tomogoma.shoppinglistapp.util.UI;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Created by ogoma on 01/03/15.
@@ -45,10 +49,11 @@ public class ItemListingFragment extends ListFragment
 	private boolean mIsItemsLoaded;
 
 	private ActionBarActivity mActivity;
-	private ActionMode mActionMode;
+	private ActionMode mSingleActionMode;
+	private android.view.ActionMode mMultipleActionMode;
 	private String mActionItemName;
 	private long mActionItemID;
-	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+	private ActionMode.Callback mSingleActionModeCallback = new ActionMode.Callback() {
 
 		@Override
 		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -69,12 +74,16 @@ public class ItemListingFragment extends ListFragment
 			switch (item.getItemId()) {
 				case R.id.action_edit: {
 					mode.finish();
-					openEditActivity();
+					openEditActivity(mActionItemID);
 					return true;
 				}
 				case R.id.action_delete: {
 					mode.finish();
-					performDelete();
+					try {
+						performDelete(mActionItemID, mActionItemName, true);
+					}catch (SQLException e) {
+						Log.e(LOG_TAG, e.getMessage());
+					}
 					return true;
 				}
 				default: return false;
@@ -83,8 +92,92 @@ public class ItemListingFragment extends ListFragment
 
 		@Override
 		public void onDestroyActionMode(ActionMode mode) {
-			mActionMode = null;
+			mSingleActionMode = null;
 			updateSelection(-1);
+		}
+	};
+	private MultiChoiceModeListener mMultiActionModeCallback = new MultiChoiceModeListener() {
+
+		private final String PLACEHOLDER_NAME = "Item";
+
+		private Menu menu;
+		private ArrayList<Long> itemIDs;
+
+		@Override
+		public void onItemCheckedStateChanged(android.view.ActionMode mode,
+		                                      int position, long id, boolean checked) {
+
+			if (checked) {
+				itemIDs.add(id);
+			} else {
+				itemIDs.remove(id);
+			}
+
+			int count = itemIDs.size();
+			//  Cannot Edit when having more than one item at hand
+			if (count == 2) {
+				menu.removeItem(R.id.action_edit);
+			}
+
+			mode.setSubtitle("(" + count + " items)");
+		}
+
+		@Override
+		public boolean onCreateActionMode(android.view.ActionMode mode, Menu menu) {
+			MenuInflater inflater = mode.getMenuInflater();
+			inflater.inflate(R.menu.single_item_context, menu);
+			this.menu = menu;
+			mMultipleActionMode = mode;
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(android.view.ActionMode mode, Menu menu) {
+			mode.setTitle(mCategoryName);
+			itemIDs = new ArrayList<>();
+			return true;
+		}
+
+		@Override
+		public boolean onActionItemClicked(android.view.ActionMode mode, MenuItem item) {
+
+			switch(item.getItemId()) {
+
+				case R.id.action_edit: {
+					mode.finish();
+					openEditActivity(itemIDs.get(0));
+					return true;
+				}
+				case R.id.action_delete: {
+
+					int failedCount = 0;
+					for (long itemID : itemIDs) {
+						try {
+							performDelete(itemID, null, false);
+						} catch (SQLException e) {
+							Log.e(LOG_TAG, e.getMessage());
+							failedCount++;
+						}
+					}
+					String toastText;
+					if (failedCount > 0) {
+						toastText = getString(R.string.error_toast_db_multi_delete_fail);
+					} else {
+						toastText = getString(R.string.toast_successful_delete);
+						toastText = String.format(toastText, PLACEHOLDER_NAME + "s");
+					}
+					UI.showToast(mActivity, toastText);
+					mode.finish();
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public void onDestroyActionMode(android.view.ActionMode mode) {
+			updateSelection(-1);
+			mode.setSubtitle(null);
 		}
 	};
 
@@ -121,6 +214,9 @@ public class ItemListingFragment extends ListFragment
 			mItemsAdapter.setOnSelectionRetrievedListener(this);
 			setListAdapter(mItemsAdapter);
 			setEmptyText(getString(R.string.advice_empty_list));
+			ListView listView = getListView();
+			listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+			listView.setMultiChoiceModeListener(mMultiActionModeCallback);
 		}
 	}
 
@@ -159,38 +255,6 @@ public class ItemListingFragment extends ListFragment
 	}
 
 	@Override
-	public void onStop() {
-		if (mActionMode!=null) {
-			mActionMode.finish();
-		}
-		super.onStop();
-	}
-
-	@Override
-	public void onListItemClick(ListView l, View view, int position, long id) {
-
-		if (position == mItemsAdapter.getSelectedPosition()) {
-			if (mActionMode != null) {
-				mActionMode.finish();
-			}
-		} else {
-			updateSelection(position);
-		}
-	}
-
-	@Override
-	public void onSelectionRetrieved(long itemID, String name) {
-
-		mActionItemID = itemID;
-		mActionItemName = name;
-
-		if (mActionMode == null) {
-			mActionMode = mActivity.startSupportActionMode(mActionModeCallback);
-		}
-		mActionMode.invalidate();
-	}
-
-	@Override
 	public void onLoadFinished(int id) {
 
 		if (id == mCurrencyLoaderID) {
@@ -213,7 +277,7 @@ public class ItemListingFragment extends ListFragment
 						CurrencyEntry.DEFAULT_SYMBOL,
 						CurrencyEntry.DEFAULT_NAME,
 						CurrencyEntry.DEFAULT_COUNTRY
-					);
+				);
 			}
 			mItemsAdapter.setCurrency(currency);
 			if (mIsItemsLoaded) {
@@ -225,6 +289,42 @@ public class ItemListingFragment extends ListFragment
 			mIsItemsLoaded = true;
 			setListShown(true);
 		}
+	}
+
+	@Override
+	public void onListItemClick(ListView l, View view, int position, long id) {
+
+		view.animate();
+		if (position == mItemsAdapter.getSelectedPosition()) {
+			if (mSingleActionMode != null) {
+				mSingleActionMode.finish();
+			}
+		} else {
+			updateSelection(position);
+		}
+	}
+
+	@Override
+	public void onSelectionRetrieved(long itemID, String name) {
+
+		mActionItemID = itemID;
+		mActionItemName = name;
+
+		if (mSingleActionMode == null) {
+			mSingleActionMode = mActivity.startSupportActionMode(mSingleActionModeCallback);
+		}
+		mSingleActionMode.invalidate();
+	}
+
+	@Override
+	public void onStop() {
+		if (mSingleActionMode !=null) {
+			mSingleActionMode.finish();
+		}
+		if (mMultipleActionMode != null) {
+			mMultipleActionMode.finish();
+		}
+		super.onStop();
 	}
 
 	private void updateSelection(int position) {
@@ -239,7 +339,7 @@ public class ItemListingFragment extends ListFragment
 		mItemsAdapter.notifyDataSetChanged();
 	}
 
-	private void openEditActivity() {
+	private void openEditActivity(long itemID) {
 
 		Bundle args = new Bundle();
 		args.putString(ListingActivity.EXTRA_String_CATEGORY_NAME, mCategoryName);
@@ -247,24 +347,31 @@ public class ItemListingFragment extends ListFragment
 		args.putSerializable(EditItemActivity.EXTRA_Class_CALLING_ACTIVITY, getClass());
 
 		Intent editItemActivityIntent = new Intent(getActivity(), EditItemActivity.class);
-		editItemActivityIntent.putExtra(ListingActivity.EXTRA_long_ITEM_ID, mActionItemID);
+		editItemActivityIntent.putExtra(ListingActivity.EXTRA_long_ITEM_ID, itemID);
 		editItemActivityIntent.putExtra(ListingActivity.EXTRA_Bundle_CATEGORY_DETAILS, args);
 		startActivity(editItemActivityIntent);
 	}
 
-	private void performDelete() {
+	private void performDelete(long itemID, String itemName, boolean showToasts) throws SQLException {
 		String whereClause = ItemEntry._ID + " = ?";
-		String[] whereArgs = new String[] {String.valueOf(mActionItemID)};
+		String[] whereArgs = new String[] {String.valueOf(itemID)};
 		ContentResolver contentResolver = getActivity().getContentResolver();
 		int count = contentResolver.delete(ItemEntry.CONTENT_URI, whereClause, whereArgs);
 		//  TODO do not delete immediately, archive and allow undo
 		if (count==0) {
-			UI.showToast(getActivity(), getActivity().getString(R.string.error_toast_db_delete_fail));
+			if (showToasts) {
+				UI.showToast(getActivity(), getActivity().getString(R.string.error_toast_db_delete_fail));
+			}
+			throw new SQLException("Failed to delete item in db; got update count of 0");
 		} else if (count>1) {
-			UI.showToast(getActivity(), getActivity().getString(R.string.error_toast_db_potential_data_corruption));
-		} else {
+			if (showToasts) {
+				UI.showToast(getActivity(), getActivity().getString(R.string.error_toast_db_potential_data_corruption));
+			}
+			throw new SQLException("Deleted more than one items in a one-item-delete scenario;" +
+					                       " total recorded deletes: " + count);
+		} else if (showToasts) {
 			String successfulMessage = getString(R.string.toast_successful_delete);
-			UI.showToast(getActivity(), String.format(successfulMessage, mActionItemName));
+			UI.showToast(getActivity(), String.format(successfulMessage, itemName));
 		}
 	}
 
