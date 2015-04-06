@@ -50,7 +50,7 @@ public class AddItemFragment extends ManipulateItemFragment {
 
 		if (itemID == -1) {
 			//  TODO edit the item?
-			String message = getString(R.string.error_toast_item_exists);
+			String message = getString(R.string.error_already_exists);
 			UI.showKeyboardToast(getActivity(), String.format(message, itemName));
 			return null;
 		}

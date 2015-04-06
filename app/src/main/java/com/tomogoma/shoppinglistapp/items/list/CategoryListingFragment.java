@@ -1,26 +1,40 @@
 package com.tomogoma.shoppinglistapp.items.list;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter.ViewBinder;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.ContentLoader;
 import com.tomogoma.shoppinglistapp.data.ContentLoader.OnLoadFinishedListener;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CategoryEntry;
+import com.tomogoma.shoppinglistapp.util.UI;
 
 import java.util.HashMap;
 
 /**
  * Created by Tom Ogoma on 01/03/15.
  */
-public class CategoryListingFragment extends ListFragment {
+public class CategoryListingFragment extends ListFragment implements OnItemLongClickListener {
 
 	public static final String EXTRA_boolean_IS_ONLY_PANE = CategoryListingFragment.class.getName() + "_is.only.pane";
 
@@ -37,9 +51,47 @@ public class CategoryListingFragment extends ListFragment {
 	private SimpleCursorAdapter mCategoryAdapter;
 	private OnCategorySelectedListener mCategorySelectCallBack;
 	private long mCurrCategoryID;
+	private String mCurrCategoryName;
 	private int mSelectPosition;
 	private boolean mIsOnlyPane;
 	private boolean mIsItemsLoaded;
+
+
+	private ActionBarActivity mActivity;
+	private ActionMode mSingleActionMode;
+	private ActionMode.Callback mSingleActionModeCallback = new ActionMode.Callback() {
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			MenuInflater inflater = mode.getMenuInflater();
+			inflater.inflate(R.menu.edit_cab, menu);
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			mode.setTitle(mCurrCategoryName);
+			return true;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+
+			switch (item.getItemId()) {
+				case R.id.action_edit: {
+					mode.finish();
+					openEditDialog();
+					return true;
+				}
+				default: return false;
+			}
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mSingleActionMode = null;
+		}
+	};
 
 	public interface OnCategorySelectedListener {
 		public void onCategorySelected(long categoryID, String categoryName);
@@ -49,6 +101,7 @@ public class CategoryListingFragment extends ListFragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		mCategorySelectCallBack = (OnCategorySelectedListener) activity;
+		mActivity = (ActionBarActivity) activity;
 	}
 
 	@Override
@@ -74,6 +127,9 @@ public class CategoryListingFragment extends ListFragment {
 		super.onViewCreated(view, savedInstanceState);
 		if (savedInstanceState == null) {
 			initializeViews();
+			ListView listView = getListView();
+			listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+			listView.setOnItemLongClickListener(this);
 		}
 	}
 
@@ -124,13 +180,38 @@ public class CategoryListingFragment extends ListFragment {
 	public void onListItemClick(ListView l, View v, int position, long id) {
 
 		super.onListItemClick(l, v, position, id);
-		Cursor cursor = mCategoryAdapter.getCursor();
-		if (cursor != null && cursor.moveToPosition(position)) {
-			mCurrCategoryID = cursor.getLong(_ID_COL_INDEX);
-			String categoryName = cursor.getString(NAME_COL_INDEX);
-			mSelectPosition = position;
-			mCategorySelectCallBack.onCategorySelected(mCurrCategoryID, categoryName);
+		if (getSelectionDetails(position)) {
+			if (mSingleActionMode!=null) {
+				mSingleActionMode.finish();
+			}
+			mCategorySelectCallBack.onCategorySelected(mCurrCategoryID, mCurrCategoryName);
 		}
+	}
+
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+		view.animate();
+		if (getSelectionDetails(position)) {
+			if (!mIsOnlyPane) {
+				mCategorySelectCallBack.onCategorySelected(mCurrCategoryID, mCurrCategoryName);
+			}
+			if (mSingleActionMode == null) {
+				mSingleActionMode = mActivity.startSupportActionMode(mSingleActionModeCallback);
+			}
+			mSingleActionMode.invalidate();
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public void onStop() {
+		if (mSingleActionMode !=null) {
+			mSingleActionMode.finish();
+		}
+		super.onStop();
 	}
 
 	private void initializeViews() {
@@ -158,6 +239,93 @@ public class CategoryListingFragment extends ListFragment {
 			}
 			});
 		setListAdapter(mCategoryAdapter);
+	}
+
+	private boolean getSelectionDetails(int position) {
+
+		Cursor cursor = mCategoryAdapter.getCursor();
+		if (cursor != null && cursor.moveToPosition(position)) {
+			mCurrCategoryID = cursor.getLong(_ID_COL_INDEX);
+			mCurrCategoryName = cursor.getString(NAME_COL_INDEX);
+			mSelectPosition = position;
+			return true;
+		}
+		return false;
+	}
+
+	private void openEditDialog() {
+
+		LayoutInflater inflater = getActivity().getLayoutInflater();
+		View dialogLayout = inflater.inflate(R.layout.dialog_edit_category, null);
+
+		final EditText etCategoryName = (EditText) dialogLayout.findViewById(R.id.categoryName);
+		Button actionDone = (Button) dialogLayout.findViewById(R.id.actionDone);
+		Button actionCancel = (Button) dialogLayout.findViewById(R.id.actionCancel);
+
+		final Dialog dialog = new Dialog(getActivity());
+		dialog.setContentView(dialogLayout);
+		dialog.setTitle(R.string.title_dialog_edit_category);
+
+		etCategoryName.setText(mCurrCategoryName);
+		actionDone.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (updateCategory(etCategoryName)) {
+					String message = getString(R.string.toast_category_updated);
+					message = String.format(message, etCategoryName.getText().toString());
+					UI.showKeyboardToast(getActivity(), message);
+					UI.hideKeyboard(mActivity, etCategoryName);
+					dialog.dismiss();
+				}
+			}
+		});
+		actionCancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
+	}
+
+	/**
+	 * Update category in db with id: {@link #mCurrCategoryID},
+	 * and name: {@link #mCurrCategoryName}.
+	 * @param etCategoryName EditText containing the new name of the category
+	 * @return true if it no post-entry-details are required from user
+	 * i.e. (safe to dismiss dialog/activity/view), false otherwise
+	 */
+	private boolean updateCategory(EditText etCategoryName) {
+
+		String newName = etCategoryName.getText().toString();
+		if (newName.isEmpty()) {
+			String message = getString(R.string.error_inputViewErr_is_empty);
+			etCategoryName.setError(message);
+			return false;
+		}
+
+		if (newName.equals(mCurrCategoryName)) {
+			return true;
+		}
+
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(CategoryEntry.COLUMN_NAME, newName);
+		int updateCount = mActivity.getContentResolver().update(
+				CategoryEntry.CONTENT_URI,
+				contentValues,
+				CategoryEntry._ID + "=?",
+				new String[]{String.valueOf(mCurrCategoryID)}
+		);
+
+		if (updateCount==0) {
+			String message = getString(R.string.error_already_exists);
+			message = String.format(message, "");
+			etCategoryName.setError(message);
+			return false;
+		}
+
+		return true;
 	}
 
 }
