@@ -344,10 +344,10 @@ public class ItemListingFragment extends ListFragment
 		Bundle args = new Bundle();
 		args.putString(ListingActivity.EXTRA_String_CATEGORY_NAME, mCategoryName);
 		args.putLong(ListingActivity.EXTRA_long_CATEGORY_ID, mCategoryID);
-		args.putSerializable(EditItemActivity.EXTRA_Class_CALLING_ACTIVITY, getClass());
 
 		Intent editItemActivityIntent = new Intent(getActivity(), EditItemActivity.class);
 		editItemActivityIntent.putExtra(ListingActivity.EXTRA_long_ITEM_ID, itemID);
+		editItemActivityIntent.putExtra(EditItemActivity.EXTRA_Class_CALLING_ACTIVITY, getActivity().getClass());
 		editItemActivityIntent.putExtra(ListingActivity.EXTRA_Bundle_CATEGORY_DETAILS, args);
 		startActivity(editItemActivityIntent);
 	}

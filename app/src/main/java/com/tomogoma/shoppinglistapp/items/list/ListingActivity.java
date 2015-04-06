@@ -22,15 +22,27 @@ public abstract class ListingActivity extends ShoppingListAppActivity {
 	public static final String EXTRA_long_ITEM_ID =
 			ListingActivity.class.getName() + "_extra.item.id";
 
+	//private static final String LOG_TAG = ListingActivity.class.getName();
+	private static final int ADD_ITEM_REQ_CODE = 5034;
+
 	protected boolean mIsResumingFromAddItemResult = false;
 	protected long mCategoryID = CategoryEntry.DEFAULT_ID;
 	protected String mCategoryName = CategoryEntry.DEFAULT_NAME;
 	protected Bundle mArguments;
 
-	private static final String LOG_TAG = ListingActivity.class.getName();
-	private static final int ADD_ITEM_REQ_CODE = 5034;
-
+	/**
+	 * The activity is resuming and requesting that the fragment listing the its items
+	 * be reloaded.
+	 * @param arguments
+	 */
 	protected abstract void showItems(Bundle arguments);
+
+	/**
+	 * Override this to add extras to your add Item intent for the
+	 * {@link com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity}.
+	 * @param addItemIntent
+	 */
+	protected void modifyAddItemIntent(Intent addItemIntent) {}
 
 	@Override
 	protected void onSuperCreate(Bundle savedInstanceState) {
@@ -54,15 +66,10 @@ public abstract class ListingActivity extends ShoppingListAppActivity {
 
 		super.onResume();
 		if (mIsResumingFromAddItemResult) {
-			showItems(packageCategoryDetails());
+			packageCategoryDetails();
+			showItems(mArguments);
 			mIsResumingFromAddItemResult = false;
 		}
-	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBundle(EXTRA_Bundle_CATEGORY_DETAILS, mArguments);
-		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -78,9 +85,9 @@ public abstract class ListingActivity extends ShoppingListAppActivity {
 		switch (item.getItemId()) {
 			case R.id.action_add: {
 
-				Bundle args = packageCategoryDetails();
 				Intent addItemIntent = new Intent(this, AddItemActivity.class);
-				addItemIntent.putExtra(EXTRA_Bundle_CATEGORY_DETAILS, args);
+				addItemIntent.putExtra(EXTRA_Bundle_CATEGORY_DETAILS, mArguments);
+				addItemIntent.putExtra(EXTRA_Class_CALLING_ACTIVITY, getClass());
 				modifyAddItemIntent(addItemIntent);
 				startAddItemActivityForResult(addItemIntent);
 				return true;
@@ -89,12 +96,21 @@ public abstract class ListingActivity extends ShoppingListAppActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	/**
-	 * Override this to add extras to your add Item intent for the
-	 * {@link com.tomogoma.shoppinglistapp.items.manipulate.add.AddItemActivity}.
-	 * @param addItemIntent
-	 */
-	protected void modifyAddItemIntent(Intent addItemIntent) {}
+	@Override
+	protected void addToUpActionIntent(Intent upIntent) {
+		upIntent.putExtra(EXTRA_Bundle_CATEGORY_DETAILS, mArguments);
+	}
+
+	@Override
+	protected void addToSettingsActivityIntent(Intent settingsIntent) {
+		settingsIntent.putExtra(EXTRA_Bundle_CATEGORY_DETAILS, mArguments);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBundle(EXTRA_Bundle_CATEGORY_DETAILS, mArguments);
+		super.onSaveInstanceState(outState);
+	}
 
 	protected void startAddItemActivityForResult(Intent addItemIntent) {
 		startActivityForResult(addItemIntent, ADD_ITEM_REQ_CODE);
@@ -104,15 +120,15 @@ public abstract class ListingActivity extends ShoppingListAppActivity {
 
 		mCategoryID = categoryID;
 		mCategoryName = categoryName;
-		return packageCategoryDetails();
+		packageCategoryDetails();
+		return mArguments;
 	}
 
-	protected Bundle packageCategoryDetails() {
+	protected void packageCategoryDetails() {
 
 		mArguments = new Bundle();
 		mArguments.putString(EXTRA_String_CATEGORY_NAME, mCategoryName);
 		mArguments.putLong(EXTRA_long_CATEGORY_ID, mCategoryID);
-		return mArguments;
 	}
 
 	@Override

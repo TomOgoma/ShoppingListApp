@@ -167,6 +167,8 @@ public class CategoryListingFragment extends ListFragment implements OnItemLongC
 		if (!mIsItemsLoaded) {
 			setListShown(false);
 		}
+
+		//  TODO total hack, find better way of doing this
 		// Cannot perform this in onLoad finished, so we come do it here
 		if (!mIsOnlyPane && mSelectPosition != ListView.INVALID_POSITION) {
 			ListView list = getListView();

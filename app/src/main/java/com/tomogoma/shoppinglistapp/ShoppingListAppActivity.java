@@ -17,6 +17,10 @@ import com.tomogoma.shoppinglistapp.util.UI;
  */
 public abstract class ShoppingListAppActivity extends ActionBarActivity {
 
+
+	public static final String EXTRA_Class_CALLING_ACTIVITY =
+			ShoppingListAppActivity.class.getName() + "_extra.calling.activity";
+
 	private  Class<?> mParentActivity;
 
 	/**
@@ -38,6 +42,20 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 	 * @param savedInstanceState
 	 */
 	protected abstract  void onSuperCreate(Bundle savedInstanceState);
+
+	/**
+	 * Override this if you want to provide extra data for the class you provided in
+	 * {@link #getParentActivity()}.
+	 * @param upIntent
+	 */
+	protected void addToUpActionIntent(Intent upIntent) {}
+
+	/**
+	 * Override this if you want the up button for the settings intent to have extra
+	 * data.
+	 * @param settingsIntent
+	 */
+	protected void addToSettingsActivityIntent(Intent settingsIntent){}
 
 	@Override
 	protected final void onCreate(Bundle savedInstanceState) {
@@ -66,7 +84,8 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 			case  R.id.action_settings: {
 
 				Intent intent = new Intent(this, SettingsActivity.class);
-				intent.putExtra(SettingsActivity.EXTRA_CALLING_ACTIVITY, getClass());
+				intent.putExtra(EXTRA_Class_CALLING_ACTIVITY, getClass());
+				addToSettingsActivityIntent(intent);
 				startActivity(intent);
 				return true;
 			}
@@ -88,12 +107,10 @@ public abstract class ShoppingListAppActivity extends ActionBarActivity {
 	}
 
 	/**
-	 * Override this if you want to provide extra data for the class you provided in
-	 * {@link #getParentActivity()}.
-	 * @param upIntent
+	 * Convenience method for adding a fragment to a container for the first time
+	 * @param containerID
+	 * @param fragment
 	 */
-	protected void addToUpActionIntent(Intent upIntent) {}
-
 	protected void addFragment(int containerID, Fragment fragment) {
 
 		getSupportFragmentManager()
