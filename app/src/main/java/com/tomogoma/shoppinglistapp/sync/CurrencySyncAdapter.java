@@ -39,14 +39,14 @@ import java.util.Vector;
 /**
  * Created by Tom Ogoma on 20/03/15.
  */
-public class SyncAdapter extends AbstractThreadedSyncAdapter {
+public class CurrencySyncAdapter extends AbstractThreadedSyncAdapter {
 
-	public static final String LOG_TAG = SyncAdapter.class.getSimpleName();
+	public static final String LOG_TAG = CurrencySyncAdapter.class.getSimpleName();
 
 	//  API allows maximum of 10 conversions per query, using 9 to be safe
 	private final double MAX_CONVERSIONS_PER_QUERY = 8d;
 
-	public SyncAdapter(Context context, boolean autoInitialize) {
+	public CurrencySyncAdapter(Context context, boolean autoInitialize) {
 		super(context, autoInitialize);
 	}
 
@@ -340,7 +340,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 		int syncInterval = Preference.getPreferredSyncInterval(context);
 		int syncFlexTime = Preference.getPreferredSyncFlexInterval(context, syncInterval);
-		SyncAdapter.configurePeriodicSync(context, syncInterval, syncFlexTime);
+		CurrencySyncAdapter.configurePeriodicSync(context, syncInterval, syncFlexTime);
 		ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.content_authority), true);
 		syncImmediately(context);
 	}

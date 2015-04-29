@@ -123,4 +123,12 @@ public class Formatter {
 		return longCurrencyBuilder.toString();
 	}
 
+	public static String formatShareDetails(String name, String price, String quantity, String description) {
+
+		quantity = quantity==null||quantity.equals("0")? "": quantity + " ";
+		price = price==null||price.equals("0")? "": "@" + price + "\\=\n";
+
+		return quantity + name + "\n" + price + description;
+	}
+
 }

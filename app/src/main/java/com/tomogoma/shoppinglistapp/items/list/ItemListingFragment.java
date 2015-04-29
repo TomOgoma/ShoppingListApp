@@ -26,6 +26,7 @@ import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.ItemEntry;
 import com.tomogoma.shoppinglistapp.items.list.ItemListAdapter.OnSelectionRetrievedListener;
 import com.tomogoma.shoppinglistapp.items.manipulate.edit.EditItemActivity;
+import com.tomogoma.shoppinglistapp.util.Formatter;
 import com.tomogoma.shoppinglistapp.util.Preference;
 import com.tomogoma.shoppinglistapp.util.UI;
 
@@ -53,6 +54,8 @@ public class ItemListingFragment extends ListFragment
 	private android.view.ActionMode mMultipleActionMode;
 	private String mActionItemName;
 	private long mActionItemID;
+	private int mShareLoaderID;
+
 	private ActionMode.Callback mSingleActionModeCallback = new ActionMode.Callback() {
 
 		@Override
@@ -69,7 +72,7 @@ public class ItemListingFragment extends ListFragment
 		}
 
 		@Override
-		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+		public boolean onActionItemClicked(ActionMode mode, final MenuItem item) {
 
 			switch (item.getItemId()) {
 				case R.id.action_edit: {
@@ -85,6 +88,41 @@ public class ItemListingFragment extends ListFragment
 						Log.e(LOG_TAG, e.getMessage());
 					}
 					return true;
+				}
+				case R.id.action_share: {
+					final ContentLoader loader = new ContentLoader(mActivity, ItemListingFragment.this);
+					loader.setOnLoadFinishedListener(new OnLoadFinishedListener() {
+						@Override
+						public void onLoadFinished(int id) {
+							if (id == mShareLoaderID) {
+								Cursor cursor = loader.getLoadedCursor(id);
+								String itemName, itemQuantity, itemDesc, itemPrice;
+								try {
+									if (cursor.moveToFirst()) {
+										itemName = cursor.getString(ItemListAdapter.ITEM_NAME_COL_INDEX);
+										itemQuantity = cursor.getString(ItemListAdapter.ITEM_QUANTITY_COL_INDEX);
+										itemDesc = cursor.getString(ItemListAdapter.ITEM_DESC_COL_INDEX);
+										itemPrice = cursor.getString(ItemListAdapter.ITEM_PRICE_COL_INDEX);
+									} else {
+										Log.e(LOG_TAG, "Unable to load item details for sharing;" +
+												" cursor count==" + cursor.getCount());
+										return;
+									}
+								} finally {
+									cursor.close();
+								}
+								String shareTitle = String.format(getString(R.string.title_share_dialog), itemName);
+								String shareDetails = Formatter.formatShareDetails(itemName, itemPrice, itemQuantity, itemDesc);
+								Intent sendIntent = new Intent();
+								sendIntent.setAction(Intent.ACTION_SEND);
+								sendIntent.putExtra(Intent.EXTRA_TEXT, shareDetails);
+								sendIntent.setType("text/plain");
+								startActivity(Intent.createChooser(sendIntent, shareTitle));
+							}
+						}
+					});
+					mShareLoaderID = loader.loadContent(ItemEntry.buildItemCurrencyUri(mActionItemID),
+					                   ItemListAdapter.ITEMS_PROJECTION, null);
 				}
 				default: return false;
 			}

@@ -14,4 +14,10 @@
 		android:title="@string/action_edit"
 		android:icon="@drawable/ic_edit"
 		app:showAsAction="always"/>
+
+	<item
+		android:id="@+id/action_share"
+		android:title="@string/action_share"
+		android:icon="@drawable/ic_share"
+		app:showAsAction="always"/>
 </menu>

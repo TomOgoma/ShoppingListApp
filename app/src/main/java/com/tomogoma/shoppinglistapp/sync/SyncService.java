@@ -10,19 +10,19 @@ import android.os.IBinder;
 public class SyncService extends Service {
 
 	private static final Object sSyncAdapterLock = new Object();
-	private static SyncAdapter sSyncAdapter = null;
+	private static CurrencySyncAdapter sCurrencySyncAdapter = null;
 
 	@Override
 	public void onCreate() {
 		synchronized (sSyncAdapterLock) {
-			if (sSyncAdapter == null) {
-				sSyncAdapter = new SyncAdapter(getApplicationContext(), true);
+			if (sCurrencySyncAdapter == null) {
+				sCurrencySyncAdapter = new CurrencySyncAdapter(getApplicationContext(), true);
 			}
 		}
 	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		return sSyncAdapter.getSyncAdapterBinder();
+		return sCurrencySyncAdapter.getSyncAdapterBinder();
 	}
 }

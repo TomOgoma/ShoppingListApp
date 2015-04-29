@@ -8,6 +8,7 @@
 	<string name="title_activity_add_item">Add Item</string>
 	<string name="title_activity_edit_item">Edit Item</string>
 	<string name ="title_activity_item_listing">Items</string>
+	<string name ="title_share_dialog">Share <xliff:g id="itemName">%s</xliff:g></string>
 	<!--Dialog Titles-->
 	<string name="title_dialog_edit_category">Edit Category Name</string>
 
@@ -17,6 +18,7 @@
 	<string name="action_done">Done</string>
 	<string name="action_cancel">Cancel</string>
 	<string name="action_edit">Edit</string>
+	<string name="action_share">Share</string>
 	<string name="action_delete">Delete</string>
 
 	<!--Sync Adapter-->

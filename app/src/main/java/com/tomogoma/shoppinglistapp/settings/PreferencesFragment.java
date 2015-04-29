@@ -22,7 +22,7 @@ import android.util.Log;
 import com.tomogoma.shoppinglistapp.R;
 import com.tomogoma.shoppinglistapp.data.Currency;
 import com.tomogoma.shoppinglistapp.data.DatabaseContract.CurrencyEntry;
-import com.tomogoma.shoppinglistapp.sync.SyncAdapter;
+import com.tomogoma.shoppinglistapp.sync.CurrencySyncAdapter;
 import com.tomogoma.shoppinglistapp.util.Formatter;
 import com.tomogoma.shoppinglistapp.util.Preference;
 import com.tomogoma.shoppinglistapp.util.UI;
@@ -226,14 +226,14 @@ public class PreferencesFragment extends PreferenceFragment
 
 					//  For currency, request an immediate sync (for sake of currency conversions)
 					if (preferenceKey.equals(currencyKey)) {
-						SyncAdapter.syncImmediately(preference.getContext());
+						CurrencySyncAdapter.syncImmediately(preference.getContext());
 					}
 					//  For sync interval, configure periodic sync immediately
 					else if (preference.getKey().equals(syncKey)) {
 						Context context = preference.getContext();
 						int syncInterval = Integer.parseInt(stringValue) * 60;
 						int syncFlexTime = Preference.getPreferredSyncFlexInterval(context, syncInterval);
-						SyncAdapter.configurePeriodicSync(context, syncInterval, syncFlexTime);
+						CurrencySyncAdapter.configurePeriodicSync(context, syncInterval, syncFlexTime);
 					}
 				}
 

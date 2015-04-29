@@ -39,17 +39,17 @@ public class ItemListAdapter extends CursorAdapter {
 			CurrencyEntry.TABLE_NAME + "." + CurrencyEntry.COLUMN_CODE,
 			CurrencyEntry.TABLE_NAME + "." + CurrencyEntry.COLUMN_LAST_CONVERSION
 	};
-	private static final int ITEM_ID_COL_INDEX = 0;
-	private static final int ITEM_NAME_COL_INDEX = 1;
-	private static final int ITEM_DESC_COL_INDEX = 2;
-	private static final int ITEM_PRICE_COL_INDEX = 3;
-	private static final int ITEM_QUANTITY_COL_INDEX = 4;
-	private static final int ITEM_MEAS_UNIT_COL_INDEX = 5;
-	private static final int ITEM_LASTS_FOR_UNIT_COL_INDEX = 6;
-	private static final int ITEM_LASTS_FOR_COL_INDEX = 7;
-	private static final int ITEM_IN_LIST_COL_INDEX = 8;
-	private static final int CURRENCY_CODE_COL_INDEX = 9;
-	private static final int CURRENCY_LATEST_CONVERSION_COL_INDEX = 10;
+	public static final int ITEM_ID_COL_INDEX = 0;
+	public static final int ITEM_NAME_COL_INDEX = 1;
+	public static final int ITEM_DESC_COL_INDEX = 2;
+	public static final int ITEM_PRICE_COL_INDEX = 3;
+	public static final int ITEM_QUANTITY_COL_INDEX = 4;
+	public static final int ITEM_MEAS_UNIT_COL_INDEX = 5;
+	public static final int ITEM_LASTS_FOR_UNIT_COL_INDEX = 6;
+	public static final int ITEM_LASTS_FOR_COL_INDEX = 7;
+	public static final int ITEM_IN_LIST_COL_INDEX = 8;
+	public static final int CURRENCY_CODE_COL_INDEX = 9;
+	public static final int CURRENCY_LATEST_CONVERSION_COL_INDEX = 10;
 
 	private static final String LOG_TAG = ItemListAdapter.class.getSimpleName();
 	private static final int SELECTED_VIEW_TYPE = 0;
