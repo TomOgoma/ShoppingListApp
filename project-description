@@ -1,0 +1,12 @@
+#Problem
+
+Organizing and handling a shopping list by hand can be a daunting task. Further, after writing the list down and marking all items to be brought, it becomes difficult to reuse the hand-written shopping list as rubbing to re-use is usually not an option. Shoppers need a way to manage and reuse their shopping lists effectively ...and save some trees while at it :)
+
+#Proposed Solution
+
+Enter the ShoppingListApp, an app that allows shoppers to enter items they wish to buy. The app should store these items for current and future use. In case the shopper needs to go shopping, he/she simply selects the items he/she needs to buy and can go shopping with ease. The next time the shopper needs to go shopping, he/she simply unselects any unwanted item that was selected from the previous shopping and selects all needed items that were not previously selected.
+The shopper should also be able to edit/add more items to his/her list.
+
+Additionally:
+1. ShoppingListApp should be able to manage the prices of the items in whichever currencies the shopper prefers, performing conversions where necessary
+2. ShoppingListApp should allow the shopper to group his/her shopping into categories to ease management/movement within supermarket aisles
