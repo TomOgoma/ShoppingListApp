@@ -295,12 +295,22 @@ public class CurrencySyncAdapter extends AbstractThreadedSyncAdapter {
 		Log.d(LOG_TAG, "Sync intervals (seconds) [interval/flex]: " + syncInterval + "/" + flexTime);
 		Account account = getSyncAccount(context);
 		String authority = context.getString(R.string.content_authority);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-			// we can enable inexact timers in our periodic sync
-			SyncRequest request = new SyncRequest.Builder().
-					                                               syncPeriodic(syncInterval, flexTime).
-					                                               setSyncAdapter(account, authority).build();
-			ContentResolver.requestSync(request);
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+			// we can try enable inexact timers in our periodic sync
+			try {
+				SyncRequest request = new SyncRequest.Builder().
+						syncPeriodic(syncInterval, flexTime).
+						setSyncAdapter(account, authority).build();
+				ContentResolver.requestSync(request);
+			} catch (Exception e) {
+				Log.e(
+						LOG_TAG,
+						"Failed to configure inexact timers for periodic sync: "
+						+ e.getMessage()
+					 );
+				ContentResolver.addPeriodicSync(account,
+						authority, new Bundle(), syncInterval);
+			}
 		} else {
 			ContentResolver.addPeriodicSync(account,
 			                                authority, new Bundle(), syncInterval);
