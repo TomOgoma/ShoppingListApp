@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file:///media/ogoma/handsam/Programmer/tools and guides/android/udacity-developing-android-apps/ShoppingListApp/ShoppingListApp.iml" filepath="/media/ogoma/handsam/Programmer/tools and guides/android/udacity-developing-android-apps/ShoppingListApp/ShoppingListApp.iml" />
-      <module fileurl="file:///media/ogoma/handsam/Programmer/tools and guides/android/udacity-developing-android-apps/ShoppingListApp/app/app.iml" filepath="/media/ogoma/handsam/Programmer/tools and guides/android/udacity-developing-android-apps/ShoppingListApp/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ShoppingListApp.iml" filepath="$PROJECT_DIR$/ShoppingListApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
 </project>
-
